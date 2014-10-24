@@ -3,6 +3,6 @@
 	
 	<script src="utils.lua" type="shared"/>
 	
-	<export function="convertToBool"/>
-	<export function="getGUICenter"/>
+	<export function="convertToBool" type="shared"/>
+	<export function="getGUICenter" type="shared"/>
 </meta>

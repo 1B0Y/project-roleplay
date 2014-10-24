@@ -20,6 +20,8 @@ function convertToBool(string)
 end
 
 function getGUICenter(rX,rY,width,height)
+	if not (localPlayer) then return nil end --Clientside function
+	
 	if (rX) and (rY) and (width) and (height) then
 		return (rX/2) - (width/2), (rY/2) - (height/2)
 	end
