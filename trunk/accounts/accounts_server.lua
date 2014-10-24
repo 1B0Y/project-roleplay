@@ -17,14 +17,17 @@ local REGISTER_WAITTIME = 60 -- Registration limit between account registrations
 local _logIn = logIn
 
 function logIn(username,password,encrypted,remember)
-	--Handle the login crap here
+	--Handle the login crap here + ban handling
 end
-addEventHandler("rp
+addEventHandler("onPlayerAttemptLogin",root,logIn)
 
 function register(username,password,email)
 	--Handle the register crap here
 end
+addEventHandler("onPlayerAttemptRegister",root,register)
 
+--FUTURE NOTE: We'll have to do some PHP stuff with this (meaning the hoster might need a email service)
 function recover(username,email)
 	--Handle recovery crap here
 end
+addEventHandler("onPlayerAttemptRecovery",root,recover)
