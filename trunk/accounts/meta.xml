@@ -1,5 +1,5 @@
 <meta>
-	<info author="Jack" name="Roleplay Accounts" description="Account Manager" version="1.0"/>
+	<info author="Jack" name="Accounts" description="Account Manager" version="1.0"/>
 	
 	<script src="accounts_client.lua" type="client"/>
 	<script src="accounts_server.lua" type="server"/>
