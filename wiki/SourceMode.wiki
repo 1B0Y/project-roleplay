@@ -1,4 +1,2 @@
-#Information about SourceMode
-
 = What is SourceMode? =
 SourceMode is the official name of Project Roleplay. I've decided to call it "SourceMode" based on an old server that this gamemode is based on called "Kutmode", but since it's open-source, i've named it "SourceMode" to fit the gamemode i'm designing.
