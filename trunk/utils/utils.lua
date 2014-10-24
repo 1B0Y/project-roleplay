@@ -18,3 +18,10 @@ function convertToBool(string)
 		return false
 	end
 end
+
+function getGUICenter(rX,rY,width,height)
+	if (rX) and (rY) and (width) and (height) then
+		return (rX/2) - (width/2), (rY/2) - (height/2)
+	end
+	return false
+end
