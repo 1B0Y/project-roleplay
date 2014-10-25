@@ -19,7 +19,7 @@ function loadCacheFile()
 		xmlSaveFile(cacheData)
 	end
 	
-	triggerEvent("onCacheFileLoaded",cacheData)
+	triggerEvent("onCacheFileLoaded",resourceRoot)
 	return true
 end
 
@@ -65,10 +65,6 @@ function setCacheData(key,value)
 end
 
 function updatePlayerDetails(username,password,remember)
-	outputDebugString("User: "..tostring(username))
-	outputDebugString("Pass: "..tostring(password))
-	outputDebugString("Rem: "..tostring(remember))
-	
 	if remember then
 		setCacheData("username",username)
 		setCacheData("password",password)

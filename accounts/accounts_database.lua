@@ -26,7 +26,7 @@ function cacheAccountData(query,player,username)
 	if (results) then
 		if (#results >= 1) then
 			for k,v in ipairs(results) do
-				table.insert(accountData[username], [v.key] = {v.value})
+				accountData[username][v.key] = v.value --Thx, ixjf @ #mta.scripting!
 			end
 		end
 	end
@@ -52,12 +52,27 @@ function setAccountData(username,key,value)
 		return false
 	end
 	
-	local connection = exports.database:getConnection() or return false
+	local connection = exports.database:getConnection()
+	if not connection then return false end
 	
 	if not (accountData[username][key]) then
 		dbExec(connection,"INSERT INTO accountdata (username,key,value) VALUES (?,?,?)",username,tostring(key),tostring(value))
 	end
 	
 	accountData[username][key] = value
+	return true
+end
+
+function saveAccountData(username)
+	if not (accountData[username]) then
+		return false
+	end
+	
+	local connection = exports.database:getConnection()
+	if not connection then return false end
+	
+	for k,v in ipairs(accountData[username]) do
+		dbExec(connection,"UPDATE accountData SET ??=? WHERE username=?",v.key,v.value,username)
+	end
 	return true
 end

@@ -17,7 +17,6 @@ local REGISTER_WAITTIME = 60 -- Registration limit between account registrations
 -- Setup some pre-definers since we'll be using custom functions
 local _logIn = logIn
 
-
 function logIn(username,password,encrypted,remember)
 	--Check if we have a database connection
 	if not (exports.database:getConnection()) then
@@ -47,6 +46,9 @@ function logIn(username,password,encrypted,remember)
 		end
 		
 		if (results[1].password == password) then
+			--Make sure we don't allow double-logins! (FUTURE PROJECT)
+			setElementData(client,"username",username)
+			setElementData(client,"ID",results[1].id)
 			triggerClientEvent(client,"returnLoginStatus",client,"Handshaking...")
 			triggerClientEvent(client,"updatePlayerCache",client,username,password,remember)
 			loadAccountData(client,username)
@@ -76,6 +78,17 @@ function recover(username,email)
 	--Handle recovery crap here
 end
 addEventHandler("onPlayerAttemptRecovery",root,recover)
+
+function getPlayerAccount(player)
+	if not player or not isElement(player) or not (getElementType(player) == "player") then return false end
+	
+	return getElementData(player,"username") or false
+end
+
+function isPlayerLoggedIn(player)
+	if not player or not isElement(player) or not (getElementType(player) == "player") then return false end
+	if getElementData(player,"username") ~= nil then return true else return false end
+end
 
 function tempReg(player,cmd,username,password)
 	if (username) and (#username >= 1) and (password) and (#password >= 1) then
