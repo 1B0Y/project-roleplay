@@ -1,10 +1,27 @@
 <meta>
 	<info author="Jack" name="Accounts" description="Account Manager" version="1.0"/>
 	
+	<!-- Core scripts -->
 	<script src="accounts_client.lua" type="client"/>
 	<script src="accounts_server.lua" type="server"/>
-	<script src="accounts_cache.lua" type="client"/>
 	
+	<!-- Data storage -->
+	<script src="accounts_cache.lua" type="client"/>
+	<script src="accounts_database.lua"  type="server"/>
+	
+	<!-- Exports -->
+	
+		<!-- Database exports-->
+		<export function="getAllAccountData" type="server"/>
+		<export function="getAccountData" type="server"/>
+		<export function="setAccountData" type="server"/>
+		
+		<!-- Cache exports-->
+		<export function="loadCacheFile" type="client"/>
+		<export function="getCacheData" type="client"/>
+		<export function="setCacheData" type="client"/>
+	
+	<!-- File stuff -->
 	<file src="images/mtalogo.png"/>
 	<file src="images/nope.jpg"/>
 	<file src="sound/nope.mp3"/>
