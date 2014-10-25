@@ -3,6 +3,7 @@
 	
 	<script src="accounts_client.lua" type="client"/>
 	<script src="accounts_server.lua" type="server"/>
+	<script src="accounts_cache.lua" type="client"/>
 	
 	<file src="images/mtalogo.png"/>
 	<file src="images/nope.jpg"/>
