@@ -10,11 +10,9 @@
 local cacheData
 
 function loadCachedAccountData()
-	outputDebugString("Loading client account data...")
 	cacheData = xmlLoadFile("@account.xml")
 	
 	if not cacheData then
-		outputDebugString("No client account data found, creating file...")
 		cacheData = xmlCreateFile("@account.xml","account")
 		xmlSaveFile(cacheData)
 	end
@@ -22,9 +20,7 @@ function loadCachedAccountData()
 end
 
 function getCachedData(key)
-	outputDebugString("getCachedData("..tostring(key)..")")
 	if not cacheData then
-		outputDebugString("Client account data not loaded, loading...")
 		loadCachedAccountData()
 	end
 	
@@ -54,7 +50,6 @@ function setCachedData(key,value)
 			return true
 		end
 	end
-	
 	
 	--Key doesn't exist, meaning we'll have to create one
 	local node = xmlCreateChild(cacheData,tostring(key))
