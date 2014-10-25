@@ -9,19 +9,23 @@
 
 local cacheData
 
-function loadCachedAccountData()
+addEvent("updatePlayerCache",true)
+
+function loadCacheFile()
 	cacheData = xmlLoadFile("@account.xml")
 	
 	if not cacheData then
 		cacheData = xmlCreateFile("@account.xml","account")
 		xmlSaveFile(cacheData)
 	end
+	
+	triggerEvent("onCacheFileLoaded",cacheData)
 	return true
 end
 
-function getCachedData(key)
+function getCacheData(key)
 	if not cacheData then
-		loadCachedAccountData()
+		loadCacheFile()
 	end
 	
 	local nodes = xmlNodeGetChildren(cacheData)
@@ -34,9 +38,9 @@ function getCachedData(key)
 	return false
 end
 
-function setCachedData(key,value)
+function setCacheData(key,value)
 	if not cacheData then
-		loadCachedAccountData()
+		loadCacheFile()
 	end
 	
 	--Check if the key already exists, otherwise create it
@@ -59,3 +63,22 @@ function setCachedData(key,value)
 	xmlSaveFile(cacheData)
 	return true --return true anyways.
 end
+
+function updatePlayerDetails(username,password,remember)
+	outputDebugString("User: "..tostring(username))
+	outputDebugString("Pass: "..tostring(password))
+	outputDebugString("Rem: "..tostring(remember))
+	
+	if remember then
+		setCacheData("username",username)
+		setCacheData("password",password)
+		setCacheData("encrypted","true")
+		setCacheData("remember","true")
+	else
+		setCacheData("username","")
+		setCacheData("password","")
+		setCacheData("encrypted","false")
+		setCacheData("remember","false")
+	end
+end
+addEventHandler("updatePlayerCache",root,updatePlayerDetails)

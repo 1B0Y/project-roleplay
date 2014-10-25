@@ -9,12 +9,14 @@
 addEvent("onPlayerAttemptLogin",true)
 addEvent("onPlayerAttemptRegister",true)
 addEvent("onPlayerAttemptRecovery",true)
+addEvent("onAccountDataLoaded",true)
 
 -- Setup some variables and tables we'll need.
 local REGISTER_WAITTIME = 60 -- Registration limit between account registrations (to prevent players making multiple accounts quickly).
 
 -- Setup some pre-definers since we'll be using custom functions
 local _logIn = logIn
+
 
 function logIn(username,password,encrypted,remember)
 	--Check if we have a database connection
@@ -28,21 +30,41 @@ function logIn(username,password,encrypted,remember)
 	if (username) and (password) and (type(encrypted) == "boolean") and (remember) then
 		local username = username:lower()
 		
-		--Do username check and login stages within a callback function.
-		local query = dbQuery(
-			function(query,player)
-				local results = dbPoll(query,-1)
-				if results and type(results) == "table" and #results >= 1 then
-					triggerClientEvent(player,"returnLoginStatus",player,"Logged in as "..username..".")
-				else
-					triggerClientEvent(player,"returnLoginStatus",player,"The username "..username.." is not registered.")
-					return
-				end
-			end, {client}, connection, "SELECT * FROM accounts WHERE username=? LIMIT 1",username
-		)
+		if not encrypted then
+			password = sha256(password)
+			encrypted = true
+		end
+		
+		--Check if the username exists
+		local query = dbQuery(connection,"SELECT * FROM accounts WHERE username=? LIMIT 1",username)
+		local results = dbPoll(query,-1) --If your server experiences major lag (and i mean, MAJOR LAG), tell me.
+		if not results then
+			triggerClientEvent(client,"returnLoginStatus",client,"An unexpected network issue has been detected. Please contact an admin. (Err: #02")
+			return
+		elseif results and #results == 0 then
+			triggerClientEvent(client,"returnLoginStatus",client,"The username "..username.." is not registered!")
+			return
+		end
+		
+		if (results[1].password == password) then
+			triggerClientEvent(client,"returnLoginStatus",client,"Handshaking...")
+			triggerClientEvent(client,"updatePlayerCache",client,username,password,remember)
+			loadAccountData(client,username)
+		else
+			triggerClientEvent(client,"returnLoginStatus",client,"Incorrect password! Please try again.")
+			return
+		end
 	end
 end
 addEventHandler("onPlayerAttemptLogin",root,logIn)
+
+function onAccountDataLoaded(username)
+	if source and isElement(source) and username then
+		local characters = getAccountData(username,"characters")
+		triggerClientEvent(source,"onCharacterDataLoaded",source,characters or {}) --If table is empty, we'll prompt the player to create a new one.
+	end
+end
+addEventHandler("onAccountDataLoaded",root,onAccountDataLoaded)
 
 function register(username,password,email)
 	--Handle the register crap here

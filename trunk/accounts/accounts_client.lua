@@ -5,7 +5,6 @@
 	Authors: Jack
 ]]--
 
-local openedWindow -- Current opened window (For issue handling)
 local reset --Info status timer.
 
 --GUI stuff
@@ -14,8 +13,6 @@ edits = {}
 checkboxes = {}
 labels = {}
 buttons = {}
-
-local disabledButtons = {{"login-register"},{"login-recover"}} --We'll remove these once we've finished scripting all the features.
 
 --Our custom event handlers
 addEvent("onPlayerLoggedIn",true)
@@ -26,9 +23,12 @@ function onStart()
 	loadCachedAccountData()
 	
 	--Login Panel
-	local width,height = 384,444
+	local width,height = 384,444+16
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
 	windows["login"] = guiCreateWindow(X,Y,width,height,"SourceMode - Login",false)
+	guiSetAlpha(windows["login"],1)
+	guiWindowSetMovable(windows["login"],false)
+	guiWindowSetSizable(windows["login"],false)
 	guiCreateStaticImage(17, 28, 350, 145,"images/mtalogo.png",false,windows["login"])
 	labels[1] = guiCreateLabel(119,181,147,18,"Username",false,windows["login"])
 	edits["login-username"] = guiCreateEdit(25,199,332,23,getCachedData("username") or "",false,windows["login"])
@@ -40,10 +40,10 @@ function onStart()
 	buttons["login-attemptLogin"] = guiCreateButton(27,299,330,26,"Login",false,windows["login"])
 	buttons["login-register"] = guiCreateButton(27,335,330,26,"Register an account",false,windows["login"])
 	buttons["login-recover"] = guiCreateButton(27,371,330,26,"Recover my account",false,windows["login"])
-	buttons["login-troll"] = guiCreateButton(287,418,87,16,"Skip Login",false,windows["login"]) --Comment this out if you're not the troll type ;)
-	labels["login-status"] = guiCreateLabel(29,398,328,20,"",false,windows["login"])
+	buttons["login-troll"] = guiCreateButton(287,418+16,87,16,"Skip Login",false,windows["login"]) --Comment this out if you're not the troll type ;)
+	labels["login-status"] = guiCreateLabel(29,398,328,20+20,"Welcome to the network of SourceMode!",false,windows["login"])
 	guiLabelSetHorizontalAlign(labels["login-status"], "center", true)
-    guiLabelSetVerticalAlign(labels["login-status"], "center")
+    guiLabelSetVerticalAlign(labels["login-status"], "top")
 	addEventHandler("onClientGUIClick",buttons["login-attemptLogin"],onClick,false)
 	addEventHandler("onClientGUIClick",buttons["login-register"],onClick,false)
 	addEventHandler("onClientGUIClick",buttons["login-recover"],onClick,false)
@@ -53,6 +53,9 @@ function onStart()
 	local width,height = 416,228
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
 	windows["NOPE"] = guiCreateWindow(X,Y,width,height,"SourceMode - NOPE",false)
+	guiSetAlpha(windows["NOPE"],1)
+	guiWindowSetMovable(windows["NOPE"],false)
+	guiWindowSetSizable(windows["NOPE"],false)
 	guiCreateStaticImage(128,23,165,98,"images/nope.jpg",false,windows["NOPE"])
 	labels[3] = guiCreateLabel(7,121,399,80,[[You need an account to play, otherwise everything you do will be lost. We don't want that! :|
 		Register an account! it doesn't take too long.]],false,windows["NOPE"])
@@ -62,6 +65,9 @@ function onStart()
 	local width,height = 493,382
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
 	windows["register"] = guiCreateWindow(X,Y,width,height, "SourceMode - Register", false)
+	guiSetAlpha(windows["register"],1)
+	guiWindowSetMovable(windows["register"],false)
+	guiWindowSetSizable(windows["register"],false)
 	guiCreateStaticImage(66, 20, 365, 120, "images/mtalogo.png", false, windows["register"])
 	edits["register-username"] = guiCreateEdit(27, 179, 270, 26, "", false, windows["register"])
 	labels[4] = guiCreateLabel(98, 161, 122, 18, "Username", false, windows["register"])
@@ -86,6 +92,9 @@ function onStart()
 	local width,height = 384,284
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
 	windows["recovery"] = guiCreateWindow(X,Y,width,height, "SourceMode - Recover", false)
+	guiSetAlpha(windows["recovery"],1)
+	guiWindowSetMovable(windows["recovery"],false)
+	guiWindowSetSizable(windows["recovery"],false)
 	guiCreateStaticImage(119, 20, 150, 68, "images/mtalogo.png", false, windows["recovery"])
 	labels[11] = guiCreateLabel(7, 88, 367, 30, "Enter your username, email and security question to recover your password.", false, windows["recovery"])
 	edits["recovery-username"] = guiCreateEdit(24, 136, 327, 21, "", false, windows["recovery"])
@@ -104,13 +113,7 @@ function onStart()
 		guiLabelSetHorizontalAlign(v, "center", true)
         guiLabelSetVerticalAlign(v, "center")
 	end
-	
-	--Loop through disabledButtons to turn off the features that aren't ready yet.
-	for k,v in ipairs(disabledButtons) do
-		guiSetEnabled(buttons[v[1]],false)
-	end
-	
-	openedWindow = "login"
+
 	guiSetVisible(windows["NOPE"],false)
 	guiSetVisible(windows["register"],false)
 	guiSetVisible(windows["recovery"],false)
@@ -126,11 +129,13 @@ function onClick(button,state)
 			guiSetVisible(windows["login"],false)
 			playSound("sound/nope.mp3")
 		elseif (source == buttons["login-register"]) then
-			guiSetVisible(windows["register"],true)
-			guiSetVisible(windows["login"],false)
+			--[[guiSetVisible(windows["register"],true)
+			guiSetVisible(windows["login"],false)]]
+			playSound("sound/nope.mp3")
 		elseif (source == buttons["login-recover"]) then
-			guiSetVisible(windows["recovery"],true)
-			guiSetVisible(windows["login"],false)
+			--[[guiSetVisible(windows["recovery"],true)
+			guiSetVisible(windows["login"],false)]]
+			playSound("sound/nope.mp3")
 		
 		--close section
 		elseif (source == buttons["NOPE-fine"]) then
@@ -207,28 +212,3 @@ function returnLoginState(text)
 	reset = setTimer(function() guiSetText(labels["login-status"],"") end, 3000, 1)
 end
 addEventHandler("returnLoginStatus",root,returnLoginState)
-
-function onPlayerLoggedIn(username,password,remember)
-	if (remember) then
-		if not cacheData then
-			loadCachedAccountData()
-		end
-		
-		if reset and isTimer(reset) then killTimer(reset) end
-		guiSetText(labels["login-status"],"Logged in. Password: "..password)
-		reset = setTimer(function() guiSetText(labels["login-status"],"") end, 3000, 1)
-		
-		setCachedData("username",username)
-		setCachedData("password",password)
-		setCachedData("remember","true")
-		setCachedData("encrypted","true")
-	else
-		setCachedData("username","")
-		setCachedData("password","")
-		setCachedData("remember","false")
-		setCachedData("encrypted","false")
-	end
-	
-	--Check if he has a character, otherwise prompt him to the character creation
-end
-addEventHandler("onPlayerLoggedIn",root,onPlayerLoggedIn)
