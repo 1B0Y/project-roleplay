@@ -1,4 +1,4 @@
-local mysql = {}
+mysql = {}
 mysql.username = "mydatabaseusername"
 mysql.password = "mydatabasepassword"
 mysql.port = 3306
