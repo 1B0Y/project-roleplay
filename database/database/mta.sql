@@ -28,7 +28,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `accountdata` (
 `id` int(11) NOT NULL COMMENT 'Unique ID',
-  `accountID` int(11) NOT NULL COMMENT 'Player''s account ID',
+  `username` int(11) NOT NULL COMMENT 'Player''s account ID',
   `key` tinytext NOT NULL COMMENT 'Key name',
   `value` text NOT NULL COMMENT 'Key value'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
