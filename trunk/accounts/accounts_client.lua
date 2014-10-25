@@ -17,10 +17,11 @@ buttons = {}
 --Our custom event handlers
 addEvent("onPlayerLoggedIn",true)
 addEvent("returnLoginStatus",true)
+addEvent("onCharacterDataLoaded",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize() --Get the player's screen resolution (so we can make sure GUI fits in all resolutions)
-	loadCachedAccountData()
+	loadCacheFile()
 	
 	--Login Panel
 	local width,height = 384,444+16
@@ -31,11 +32,11 @@ function onStart()
 	guiWindowSetSizable(windows["login"],false)
 	guiCreateStaticImage(17, 28, 350, 145,"images/mtalogo.png",false,windows["login"])
 	labels[1] = guiCreateLabel(119,181,147,18,"Username",false,windows["login"])
-	edits["login-username"] = guiCreateEdit(25,199,332,23,getCachedData("username") or "",false,windows["login"])
+	edits["login-username"] = guiCreateEdit(25,199,332,23,getCacheData("username") or "",false,windows["login"])
 	labels[2] = guiCreateLabel(119,233,147,18,"Password",false,windows["login"])
-	edits["login-password"] = guiCreateEdit(25,251,332,23,getCachedData("password") or "",false,windows["login"])
+	edits["login-password"] = guiCreateEdit(25,251,332,23,getCacheData("password") or "",false,windows["login"])
 	guiEditSetMasked(edits["login-password"],true)
-	remember = exports.utils:convertToBool(getCachedData("remember")) or false
+	remember = exports.utils:convertToBool(getCacheData("remember")) or false
 	checkboxes["remember"] = guiCreateCheckBox(132, 278, 124, 21, "Remember Details", remember, false, windows["login"])
 	buttons["login-attemptLogin"] = guiCreateButton(27,299,330,26,"Login",false,windows["login"])
 	buttons["login-register"] = guiCreateButton(27,335,330,26,"Register an account",false,windows["login"])
@@ -107,6 +108,8 @@ function onStart()
 	buttons["recovery-attemptRecovery"] = guiCreateButton(205, 247, 136, 24, "Recover account", false, windows["recovery"])
 	addEventHandler("onClientGUIClick",buttons["recovery-back"],onClick,false)
 	addEventHandler("onClientGUIClick",buttons["recovery-attemptRecovery"],onClick,false)
+	
+	--Character GUI goes here
 
 	--Loop through all labels and add centering
 	for k,v in ipairs(labels) do
@@ -154,7 +157,7 @@ function onClick(button,state)
 			local username = guiGetText(edits["login-username"]):gsub("[%s]","") --Filter everything but characters
 			local password = guiGetText(edits["login-password"])
 			local remember = guiCheckBoxGetSelected(checkboxes["remember"]) or false
-			local encrypted = getCachedData("encrypted") or false
+			local encrypted = getCacheData("encrypted") or false
 			local encrypted = exports.utils:convertToBool(encrypted)
 			
 			if (#username >= 1) and (#password >= 1) then
@@ -186,7 +189,6 @@ function onElementChanged(element)
 			guiSetText(buttons["login-attemptLogin"],"Login")
 		end
 	elseif (element == edits["login-password"]) then
-		outputDebugString("Password edit was altered, changing encryption to false...")
 		setCachedData("encrypted","false") --Disable this since the password was edited.
 	elseif (element == edits["register-username"]) then
 		local username = guiGetText(edits["register-username"])
@@ -212,3 +214,13 @@ function returnLoginState(text)
 	reset = setTimer(function() guiSetText(labels["login-status"],"") end, 3000, 1)
 end
 addEventHandler("returnLoginStatus",root,returnLoginState)
+
+function loadCharacterData(data)
+	outputChatBox("I should create the character selection...")
+	guiSetVisible(windows["login"],false)
+	guiSetVisible(windows["NOPE"],false)
+	guiSetVisible(windows["register"],false)
+	guiSetVisible(windows["recovery"],false)
+	showCursor(false)
+end
+addEventHandler("onCharacterDataLoaded",root,loadCharacterData)
