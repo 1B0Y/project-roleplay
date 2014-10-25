@@ -10,23 +10,32 @@
 local cacheData
 
 function loadCachedAccountData()
+	outputDebugString("Loading client account data...")
 	cacheData = xmlLoadFile("@account.xml")
 	
 	if not cacheData then
+		outputDebugString("No client account data found, creating file...")
 		cacheData = xmlCreateFile("@account.xml","account")
 		xmlSaveFile(cacheData)
-		return false --Stop here, since we have no data to load
 	end
 	return true
 end
 
 function getCachedData(key)
+	outputDebugString("getCachedData("..tostring(key)..")")
 	if not cacheData then
+		outputDebugString("Client account data not loaded, loading...")
 		loadCachedAccountData()
 	end
 	
-	local key = xmlFindChild(cacheData,tostring(key))
-	return xmlNodeGetAttribute(key) or false
+	local nodes = xmlNodeGetChildren(cacheData)
+	for k,v in ipairs(nodes) do
+		local nodeName = xmlNodeGetName(v)
+		if (nodeName == key) then
+			return xmlNodeGetValue(v)
+		end
+	end
+	return false
 end
 
 function setCachedData(key,value)
@@ -35,15 +44,21 @@ function setCachedData(key,value)
 	end
 	
 	--Check if the key already exists, otherwise create it
-	local node = xmlFindChild(cacheData,tostring(key))
-	if (node) then
-		xmlNodeSetAttribute(node,tostring(value))
-		return true
+	local node = xmlNodeGetChildren(cacheData)
+	local found = false
+	
+	for k,v in ipairs(node) do
+		if (xmlNodeGetName(v) == tostring(key)) then
+			xmlNodeSetValue(v,tostring(value))
+			xmlSaveFile(cacheData) --save here, as we're returning true (and won't reach xmlSaveFile at the bottom of the function)
+			return true
+		end
 	end
+	
 	
 	--Key doesn't exist, meaning we'll have to create one
 	local node = xmlCreateChild(cacheData,tostring(key))
-	xmlNodeSetAttribute(node,tostring(value)
+	xmlNodeSetValue(node,tostring(value))
 	
 	--Save it
 	xmlSaveFile(cacheData)

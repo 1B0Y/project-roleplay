@@ -15,8 +15,9 @@ checkboxes = {}
 labels = {}
 buttons = {}
 
-local disabledButtons = {{"login-register"},{"login-recover"}}
+local disabledButtons = {{"login-register"},{"login-recover"}} --We'll remove these once we've finished scripting all the features.
 
+--Our custom event handlers
 addEvent("onPlayerLoggedIn",true)
 
 function onStart()
@@ -29,11 +30,13 @@ function onStart()
 	windows["login"] = guiCreateWindow(X,Y,width,height,"SourceMode - Login",false)
 		guiCreateStaticImage(17, 28, 350, 145,"images/mtalogo.png",false,windows["login"])
 		labels[1] = guiCreateLabel(119,181,147,18,"Username",false,windows["login"])
-		edits["login-username"] = guiCreateEdit(25,199,332,23,getCachedData("username"),false,windows["login"])
+		edits["login-username"] = guiCreateEdit(25,199,332,23,getCachedData("username") or "",false,windows["login"])
 		labels[2] = guiCreateLabel(119,233,147,18,"Password",false,windows["login"])
-		edits["login-password"] = guiCreateEdit(25,251,332,23,getCachedData("password"),false,windows["login"])
+		edits["login-password"] = guiCreateEdit(25,251,332,23,getCachedData("password") or "",false,windows["login"])
 		guiEditSetMasked(edits["login-password"],true)
-		checkboxes["remember"] = guiCreateCheckBox(132, 278, 124, 21, "Remember Details", getCachedData("remember"), false, windows["login"])
+		
+		remember = exports.utils:convertToBool(getCachedData("remember")) or false
+		checkboxes["remember"] = guiCreateCheckBox(132, 278, 124, 21, "Remember Details", remember, false, windows["login"])
 		buttons["login-attemptLogin"] = guiCreateButton(27,299,330,26,"Login",false,windows["login"])
 		buttons["login-register"] = guiCreateButton(27,335,330,26,"Register an account",false,windows["login"])
 		buttons["login-recover"] = guiCreateButton(27,371,330,26,"Recover my account",false,windows["login"])
