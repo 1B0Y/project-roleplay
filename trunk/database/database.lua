@@ -11,7 +11,7 @@ function onStart()
 	--Make sure we have the database information from settings
 	if not (type(mysql.username) == "string") or not (#mysql.username >= 1) then error("[Database] Username required!") end
 	if not (type(mysql.password) == "string") or not (#mysql.password >= 1) then error("[Database] Password required!") end
-	if not (type(mysql.hostname) == "string") or not (#mysql.hostname >= 1) then error("[Database] Hostname required!") end
+	if not (type(mysql.host) == "string") or not (#mysql.host >= 1) then error("[Database] Hostname required!") end
 	if not (type(mysql.port) == "number") then mysql.port = 3302 end
 	if not (type(mysql.database) == "string") or not (#mysql.database >= 1) then error("[Database] Database name required!") end
 	
