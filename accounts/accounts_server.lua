@@ -74,11 +74,11 @@ addEventHandler("onResourceStop",resourceRoot,onStop)
 ]]
 function logIn(username,password,remember,encrypted)
 	--Check if we have a database connection
-	if not (exports.database:getConnection()) then
-		triggerClientEvent(client,"returnLoginStatus",client,"A networking issue has occured. Please contact an admin. (Err: #01)")
+	local connection = exports.database:getConnection()
+	if not (connection) then
+		triggerClientEvent(client,"returnUpdateStatus",client,"login","A networking issue has occured. Please contact an admin. (Err: #01)")
 		return
 	end
-	local connection = exports.database:getConnection()
 
 	--Check if the username, password and etc was passed through.
 	if (username) and (password) and (type(encrypted) == "boolean") then
@@ -97,10 +97,10 @@ function logIn(username,password,remember,encrypted)
 		local query = dbQuery(connection,"SELECT * FROM accounts WHERE username=? LIMIT 1",username)
 		local results = dbPoll(query,-1) --If your server experiences major lag (and i mean, MAJOR LAG), tell me.
 		if not results then
-			triggerClientEvent(client,"returnLoginStatus",client,"An unexpected network issue has been detected. Please contact an admin. (Err: #02")
+			triggerClientEvent(client,"returnUpdateStatus",client,"login","An unexpected network issue has been detected. Please contact an admin. (Err: #02")
 			return
 		elseif results and #results == 0 then
-			triggerClientEvent(client,"returnLoginStatus",client,"The username "..username.." is not registered!")
+			triggerClientEvent(client,"returnUpdateStatus",client,"login","The username "..username.." is not registered!")
 			return
 		end
 		
@@ -108,11 +108,11 @@ function logIn(username,password,remember,encrypted)
 			--Make sure we don't allow double-logins! (FUTURE PROJECT)
 			setElementData(client,"username",username)
 			setElementData(client,"ID",results[1].id)
-			triggerClientEvent(client,"returnLoginStatus",client,"Handshaking...")
+			triggerClientEvent(client,"returnUpdateStatus",client,"login","Handshaking...")
 			triggerClientEvent(client,"updatePlayerCache",client,username,password,remember)
 			loadAccountData(client,username)
 		else
-			triggerClientEvent(client,"returnLoginStatus",client,"Incorrect password! Please try again.")
+			triggerClientEvent(client,"returnUpdateStatus",client,"login","Incorrect password! Please try again.")
 			return
 		end
 	end
@@ -131,8 +131,37 @@ function onAccountDataLoaded(username)
 end
 addEventHandler("onAccountDataLoaded",root,onAccountDataLoaded)
 
+--[[
+	register
+	Custom register system. Handles player's register data and checks if the username is available. From there, we make the account.
+]]
 function register(username,password,email)
-	--Handle the register crap here
+	--Make sure we have a database connection
+	local connection = exports.database:getConnection()
+	if not connection then
+		triggerClientEvent(client,"returnUpdateStatus",client,"register","A networking issue has occured. Please contact an admin. (Err: #03)")
+		return
+	end
+	
+	if (username) and (password) then
+		--Make sure the username doesn't exist
+		if (usernameCache[username]) then
+			triggerClientEvent(client,"returnUpdateStatus",client,"register",username.." is already registered! Please choose another username.")
+			return
+		end
+		
+		--encrypt the password
+		password = sha256(password)
+		
+		--Create the account
+		if (dbExec(connection,"INSERT INTO accounts (username,password,email,lastlogin) VALUES (?,?,?,now())",username,password,email or "NULL")) then
+			triggerClientEvent(client,"onAccountRegistered",client,true,username,password)
+			usernameCache[username] = true --Cache this to prevent anyone registering the same username again.
+		else
+			triggerClientEvent(client,"returnUpdateStatus",client,"register","A network issue has occured. Please contact an admin. (Err: #04)")
+			return
+		end
+	end --If you want to return an error, change this!
 end
 addEventHandler("onPlayerAttemptRegister",root,register)
 
@@ -150,10 +179,8 @@ function checkUsername(username)
 	if username and #username >= USERNAME_LIMIT then
 		local username = username:lower()
 		if (usernameCache[username]) then
-			outputDebugString("Username is not available")
 			available = false
 		else
-			outputDebugString("Username is available!")
 			available = true
 		end
 		triggerClientEvent(client,"returnUsernameAvailability",client,username,available)
@@ -162,16 +189,3 @@ function checkUsername(username)
 	end
 end
 addEventHandler("checkUsernameAvailability",root,checkUsername)
-
-function tempReg(player,cmd,username,password)
-	if (username) and (#username >= 1) and (password) and (#password >= 1) then
-		local connection = exports.database:getConnection()
-		if (connection) then
-			dbExec(connection,"INSERT INTO accounts (username,password,lastlogin) VALUES (?,?,now())",tostring(username:lower()),tostring(sha256(password)))
-			outputChatBox("Account inserted.")
-		else
-			error("No database connection.")
-		end
-	end
-end
-addCommandHandler("dReg",tempReg)
