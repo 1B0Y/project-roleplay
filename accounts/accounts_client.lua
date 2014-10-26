@@ -20,6 +20,7 @@ addEvent("onPlayerLoggedIn",true)
 addEvent("returnUpdateStatus",true)
 addEvent("returnUsernameAvailability",true)
 addEvent("onAccountRegistered",true)
+addEvent("toggleGUI",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize() --Get the player's screen resolution (so we can make sure GUI fits in all resolutions)
@@ -51,10 +52,10 @@ function onStart()
 	labels["login-status"] = guiCreateLabel(29,398,328,20+20,"Welcome to the network of SourceMode!",false,windows["login"])
 	guiLabelSetHorizontalAlign(labels["login-status"], "center", true)
 	guiLabelSetVerticalAlign(labels["login-status"], "top")
-	addEventHandler("onClientGUIClick",buttons["login-attemptLogin"],onClick,false)
-	addEventHandler("onClientGUIClick",buttons["login-register"],onClick,false)
-	addEventHandler("onClientGUIClick",buttons["login-recover"],onClick,false)
-	addEventHandler("onClientGUIClick",buttons["login-troll"],onClick,false)
+	addEventHandler("onClientGUIClick",buttons["login-attemptLogin"],onAccountClick,false)
+	addEventHandler("onClientGUIClick",buttons["login-register"],onAccountClick,false)
+	addEventHandler("onClientGUIClick",buttons["login-recover"],onAccountClick,false)
+	addEventHandler("onClientGUIClick",buttons["login-troll"],onAccountClick,false)
 	
 	--[[
 		NOPE Panel
@@ -70,11 +71,11 @@ function onStart()
 	labels[3] = guiCreateLabel(7,121,399,80,[[You need an account to play, otherwise everything you do will be lost. We don't want that! :|
 		Register an account! it doesn't take too long.]],false,windows["NOPE"])
 	buttons["NOPE-fine"] = guiCreateButton(128,201,165,23,"hhh... fine!",false,windows["NOPE"])
-	addEventHandler("onClientGUIClick",buttons["NOPE-fine"],onClick,false)
+	addEventHandler("onClientGUIClick",buttons["NOPE-fine"],onAccountClick,false)
 	
 	--[[
 		Register Panel
-		Version 2
+		Version 3
 	]]
 	windows["register"] = guiCreateWindow(489, 116, 303, 498, "SourceMode - Register", false)
 	guiWindowSetSizable(windows["register"], false)
@@ -99,8 +100,8 @@ function onStart()
 	guiLabelSetHorizontalAlign(labels["register-status"], "center", true)
 	buttons["register-attemptRegister"] = guiCreateButton(41, 387+30, 215, 29, "Register my account", false, windows["register"])
 	buttons["register-cancel"] = guiCreateButton(41, 426+28, 215, 29, "Cancel, back to login.", false, windows["register"])	
-	addEventHandler("onClientGUIClick",buttons["register-attemptRegister"],onClick,false)
-	addEventHandler("onClientGUIClick",buttons["register-cancel"],onClick,false)
+	addEventHandler("onClientGUIClick",buttons["register-attemptRegister"],onAccountClick,false)
+	addEventHandler("onClientGUIClick",buttons["register-cancel"],onAccountClick,false)
 	
 	--[[
 		Recovery Panel
@@ -122,8 +123,8 @@ function onStart()
 	labels[10] = guiCreateLabel(115, 202, 154, 14, "Security Question", false, windows["recovery"])
 	buttons["recovery-back"] = guiCreateButton(34, 247, 136, 24, "Go back to Log In", false, windows["recovery"])
 	buttons["recovery-attemptRecovery"] = guiCreateButton(205, 247, 136, 24, "Recover account", false, windows["recovery"])
-	addEventHandler("onClientGUIClick",buttons["recovery-back"],onClick,false)
-	addEventHandler("onClientGUIClick",buttons["recovery-attemptRecovery"],onClick,false)
+	addEventHandler("onClientGUIClick",buttons["recovery-back"],onAccountClick,false)
+	addEventHandler("onClientGUIClick",buttons["recovery-attemptRecovery"],onAccountClick,false)
 
 	--Loop through all labels and add centering
 	for k,v in ipairs(labels) do
@@ -141,7 +142,7 @@ end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)
 
 --onClick: Handles all buttons within the account system.
-function onClick(button,state)
+function onAccountClick(button,state)
 	if (button == "left") and (state == "up") then
 		--open section
 		if (source == buttons["login-troll"]) then
@@ -207,11 +208,6 @@ function sendRegisterData()
 	local password = guiGetText(edits["register-password"])
 	local passwordConf = guiGetText(edits["register-confirm"])
 	local email = guiGetText(edits["register-email"])
-	
-	outputDebugString("user: "..username)
-	outputDebugString("pass: "..password)
-	outputDebugString("conf: "..passwordConf)
-	outputDebugString("email: "..email)
 	
 	if not (#username >= 1) then
 		guiSetText(labels["status-username"],"Enter a username!")
@@ -349,10 +345,19 @@ function onAccountRegistered(state,username,password)
 end
 addEventHandler("onAccountRegistered",root,onAccountRegistered)
 
---toggleAccountWindows: Misc function for Characters (check accounts_characters.lua)
-function toggleAccountWindows(state)
-	guiSetVisible(windows["login"],state)
-	guiSetVisible(windows["NOPE"],state)
-	guiSetVisible(windows["register"],state)
-	guiSetVisible(windows["recovery"],state)
+function toggleWindows(window,state)
+	if (window == "all") then
+		guiSetVisible(windows["login"],state)
+		guiSetVisible(windows["NOPE"],state)
+		guiSetVisible(windows["register"],state)
+		guiSetVisible(windows["recovery"],state)
+		toggleCharacterWindows("all",state) --Turn off character windows aswell.
+	else
+		if (windows[window]) then
+			guiSetVisible(windows[window],state)
+		elseif (window == "characters") or (window == "characters_create") then --We'll allow characters window control from here.
+			toggleCharacterWindows(window,state)
+		end
+	end
 end
+addEventHandler("toggleGUI",root,toggleWindows)
