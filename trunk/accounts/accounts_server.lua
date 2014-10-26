@@ -1,7 +1,7 @@
 --[[
 	Project: SourceMode
 	Version: 1.0
-	Last Edited: 24/10/2014 (Jack)
+	Last Edited: 26/10/2014 (Jack)
 	Authors: Jack
 ]]--
 
@@ -10,6 +10,7 @@
 	Used for triggerClientEvents and triggerEvent.
 ]]
 addEvent("onPlayerAttemptLogin",true)
+addEvent("onPlayerAttemptLogout",true)
 addEvent("onPlayerAttemptRegister",true)
 addEvent("onPlayerAttemptRecovery",true)
 addEvent("onAccountDataLoaded",true)
@@ -21,8 +22,9 @@ addEvent("checkUsernameAvailability",true)
 ]]
 local REGISTER_WAITTIME = 60 -- Registration limit between account registrations (to prevent players making multiple accounts quickly).
 local usernameCache = {} --Store all accounts usernames into this table
-local _logIn = logIn --Override the logIn function to our own! :D
 local USERNAME_LIMIT = 3 --Must be more than 3 chars!
+local _logIn = logIn --Override the logIn function to our own! :D
+local _logOut = logOut --Override! :D
 
 --[[
 	onStart
@@ -108,9 +110,15 @@ function logIn(username,password,remember,encrypted)
 			--Make sure we don't allow double-logins! (FUTURE PROJECT)
 			setElementData(client,"username",username)
 			setElementData(client,"ID",results[1].id)
+			dbExec(connection,"UPDATE accounts SET serial=? WHERE username=?",getPlayerSerial(client),username)
 			triggerClientEvent(client,"returnUpdateStatus",client,"login","Handshaking...")
 			triggerClientEvent(client,"updatePlayerCache",client,username,password,remember)
-			loadAccountData(client,username)
+			if (isAccountDataLoaded(username)) then
+				triggerEvent("onAccountDataLoaded",client,username)
+			else
+				loadAccountData(client,username)
+			end
+			triggerEvent("onPlayerLoggedIn",client)
 		else
 			triggerClientEvent(client,"returnUpdateStatus",client,"login","Incorrect password! Please try again.")
 			return
@@ -118,6 +126,23 @@ function logIn(username,password,remember,encrypted)
 	end
 end
 addEventHandler("onPlayerAttemptLogin",root,logIn)
+
+function logOut()
+	if (isPlayerLoggedIn(client)) then
+		saveAccountData(getElementData(client,"username")) --Force save the player's crap.
+		removeElementData(client,"username")
+		removeElementData(client,"ID")
+		outputChatBox(getPlayerName(client).." logged out.",root,255,0,0)
+		triggerClientEvent(client,"toggleGUI",client,"all",false)
+		triggerClientEvent(client,"toggleGUI",client,"login",true)
+		triggerEvent("onPlayerLoggedOut",client)
+		setCameraMatrix(client,1966.75, 1542.896484, 36.1860351, 2004.199218, 1541.3876953, 13.5907506)
+		return true
+	else
+		return false
+	end
+end
+addEventHandler("onPlayerAttemptLogout",root,logOut)
 
 --[[
 	onAccountDataLoaded
@@ -150,13 +175,9 @@ function register(username,password,email)
 			return
 		end
 		
-		--encrypt the password
-		password = sha256(password)
-		
 		--Create the account
 		if (dbExec(connection,"INSERT INTO accounts (username,password,email,lastlogin) VALUES (?,?,?,now())",username,password,email or "NULL")) then
 			triggerClientEvent(client,"onAccountRegistered",client,true,username,password)
-			usernameCache[username] = true --Cache this to prevent anyone registering the same username again.
 		else
 			triggerClientEvent(client,"returnUpdateStatus",client,"register","A network issue has occured. Please contact an admin. (Err: #04)")
 			return

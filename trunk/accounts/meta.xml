@@ -18,6 +18,7 @@
 		<export function="getAccountData" type="server"/>
 		<export function="setAccountData" type="server"/>
 		<export function="saveAccountData" type="server"/>
+		<export function="isAccountDataLoaded" type="server"/>
 		
 		<!-- Cache exports-->
 		<export function="loadCacheFile" type="client"/>
@@ -27,10 +28,6 @@
 		<!-- Accounts exports-->
 		<export function="getPlayerAccount" type="server"/>
 		<export function="isPlayerLoggedIn" type="server"/>
-	
-	<!-- Included Resources-->
-	<include resource="database"/>
-	<include resource="utils"/>
 	
 	<!-- File stuff -->
 	<file src="images/mtalogo.png"/>

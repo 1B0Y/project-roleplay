@@ -28,7 +28,6 @@ function cacheAccountData(query,player,username)
 	if (results) then
 		if (#results >= 1) then
 			for k,v in ipairs(results) do
-				outputDebugString("Key: "..tostring(v.name)..", Value: "..tostring(v.value))
 				accountData[username][tostring(v.name)] = v.value --Thx, ixjf @ #mta.scripting!
 			end
 		end
