@@ -20,9 +20,6 @@ function onStart()
 	guiWindowSetSizable(windows["character"], false)
 	guiSetAlpha(windows["character"], 1.00)
 	gridlists["characters"] = guiCreateGridList(9, 91, 246, 278, false, windows["character"])
-	character = guiGridListAddColumn(gridlists["characters"], "Character", 0.3)
-	duration = guiGridListAddColumn(gridlists["characters"], "Duration", 0.3)
-	money = guiGridListAddColumn(gridlists["characters"], "Money", 0.3)
 	buttons["join"] = guiCreateButton(9, 22, 246, 59, "LET'S PARTY!", false, windows["character"])
 	buttons["create"] = guiCreateButton(20, 376, 225, 28, "Create new character", false, windows["character"])
 	
@@ -35,12 +32,13 @@ function loadCharacterData(data)
 	fadeCamera(false,1.0,0,0,0)
 	toggleAccountWindows(false)
 	if (data) and (#data >= 1) then
-		--Parse it
+		character = guiGridListAddColumn(gridlists["characters"], "Character", 0.3)
+		duration = guiGridListAddColumn(gridlists["characters"], "Duration", 0.3)
+		money = guiGridListAddColumn(gridlists["characters"], "Money", 0.3)
 	else
-		row = guiGridListAddRow(gridlists["characters"])
-		guiGridListSetItemText(gridlists["characters"],row,character,"N/A",false,false)
-		guiGridListSetItemText(gridlists["characters"],row,duration,"N/A",false,false)
-		guiGridListSetItemText(gridlists["characters"],row,money,"N/A",false,false)
+		char = guiGridListAddColumn(gridlists["characters"],"Characters",0.9)
+		guiGridListSetItemText(gridlists["characters"],guiGridListAddRow(gridlists["characters"]),char,"You have no characters!",false,false)
+		guiGridListSetItemText(gridlists["characters"],guiGridListAddRow(gridlists["characters"]),char,"",false,false)
 	end
 	setTimer(guiSetVisible,1000,1,windows["character"],true)
 	setTimer(fadeCamera,1000,1,true,1.0)

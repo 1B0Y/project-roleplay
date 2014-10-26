@@ -17,8 +17,9 @@ local gridlists = {}
 
 --Our custom event handlers
 addEvent("onPlayerLoggedIn",true)
-addEvent("returnLoginStatus",true)
+addEvent("returnUpdateStatus",true)
 addEvent("returnUsernameAvailability",true)
+addEvent("onAccountRegistered",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize() --Get the player's screen resolution (so we can make sure GUI fits in all resolutions)
@@ -75,7 +76,7 @@ function onStart()
 		Register Panel
 		Version 2
 	]]
-	windows["register"] = guiCreateWindow(489, 116, 303, 488, "SourceMode - Register", false)
+	windows["register"] = guiCreateWindow(489, 116, 303, 498, "SourceMode - Register", false)
 	guiWindowSetSizable(windows["register"], false)
 	guiWindowSetMovable(windows["register"],false)
 	guiSetAlpha(windows["register"], 1.00)
@@ -90,14 +91,14 @@ function onStart()
 	labels["status-password"] = guiCreateLabel(16, 223, 271, 34, "Choose a password.", false, windows["register"])
 	labels["status-confirm"] = guiCreateLabel(16, 283, 271, 34, "Confirm your chosen password.", false, windows["register"])
 	labels["status-email"] = guiCreateLabel(16, 343, 271, 34, "Enter your email address.\nOptional, but recommended!", false, windows["register"])
-	labels["register-status"] = guiCreateLabel(22, 378, 260, 25, "", false, windows["register"])
+	labels["register-status"] = guiCreateLabel(22, 378, 260, 35, "", false, windows["register"])
 	guiLabelSetHorizontalAlign(labels["status-username"], "center", true)
 	guiLabelSetHorizontalAlign(labels["status-password"], "center", true)
 	guiLabelSetHorizontalAlign(labels["status-confirm"], "center", true)
 	guiLabelSetHorizontalAlign(labels["status-email"], "center", true)
 	guiLabelSetHorizontalAlign(labels["register-status"], "center", true)
-	buttons["register-attemptRegister"] = guiCreateButton(41, 387+20, 215, 29, "Register my account", false, windows["register"])
-	buttons["register-cancel"] = guiCreateButton(41, 426+18, 215, 29, "Cancel, back to login.", false, windows["register"])	
+	buttons["register-attemptRegister"] = guiCreateButton(41, 387+30, 215, 29, "Register my account", false, windows["register"])
+	buttons["register-cancel"] = guiCreateButton(41, 426+28, 215, 29, "Cancel, back to login.", false, windows["register"])	
 	addEventHandler("onClientGUIClick",buttons["register-attemptRegister"],onClick,false)
 	addEventHandler("onClientGUIClick",buttons["register-cancel"],onClick,false)
 	
@@ -135,6 +136,7 @@ function onStart()
 	guiSetVisible(windows["register"],false)
 	guiSetVisible(windows["recovery"],false)
 	showCursor(true)
+	guiSetInputMode("no_binds") --Disable chat and etc..
 end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)
 
@@ -188,12 +190,9 @@ function sendLoginData()
 	local encrypted = getCacheData("encrypted") or false
 	local encrypted = exports.utils:convertToBool(encrypted)
 	
-	outputDebugString(type(remember))
-	
 	if (#username >= 3) and (#password >= 5) then
 		triggerServerEvent("onPlayerAttemptLogin",localPlayer,username,password,remember,encrypted)
 		guiSetText(labels["login-status"],"Logging in as "..username.."...")
-		outputDebugString("Attempting to login for "..username)
 	else
 		guiSetText(labels["login-status"],"You must have the username and password boxes filled in!")
 		if reset and isTimer(reset) then killTimer(reset) end
@@ -220,13 +219,13 @@ function sendRegisterData()
 		if reset and isTimer(reset) then killTimer(reset) end
 		reset = setTimer(function() guiLabelSetColor(labels["status-username"],255,255,255) end, 3000, 1)
 		return
-	elseif not (#password >= 1) then
+	elseif not (#password >= 5) then
 		guiSetText(labels["status-password"],"Enter a password!")
 		guiLabelSetColor(labels["status-password"],255,0,0)
 		if reset and isTimer(reset) then killTimer(reset) end
 		reset = setTimer(function() guiLabelSetColor(labels["status-password"],255,255,255) end, 3000, 1)
 		return
-	elseif not (#passwordConf >= 1) then
+	elseif not (#passwordConf >= 5) then
 		guiSetText(labels["status-confirm"],"Re-enter your password!")
 		guiLabelSetColor(labels["status-confirm"],255,0,0)
 		if reset and isTimer(reset) then killTimer(reset) end
@@ -239,10 +238,11 @@ function sendRegisterData()
 		reset = setTimer(function() guiLabelSetColor(labels["status-confirm"],255,255,255) end, 3000, 1)
 		return
 	elseif not (#email >= 1) then
-		email = "" --He can set this later.
+		email = "NULL" --He can set this later.
 	end
 	
-	outputChatBox("PASSED.")
+	triggerServerEvent("onPlayerAttemptRegister",localPlayer,username,password,email)
+	return true
 end
 
 --GUIAccepted: Pressing "Enter" will toggle the functions below.
@@ -297,12 +297,21 @@ end
 addEventHandler("onClientGUIChanged",root,onElementChanged)
 
 --returnLoginState: Displays information regarding login (like networking issues, wrong password, ...)
-function returnLoginState(text)
-	guiSetText(labels["login-status"],tostring(text))
+function returnUpdateStatus(gui,text)
+	local element
+	if (gui == "login") then
+		element = labels["login-status"]
+	elseif (gui == "register") then
+		element = labels["register-status"]
+	else
+		return
+	end
+	
+	guiSetText(element,tostring(text))
 	if reset and isTimer(reset) then killTimer(reset) end
-	reset = setTimer(function() guiSetText(labels["login-status"],"") end, 3000, 1)
+	reset = setTimer(function() guiSetText(element,"") end, 3000, 1)
 end
-addEventHandler("returnLoginStatus",root,returnLoginState)
+addEventHandler("returnUpdateStatus",root,returnUpdateStatus)
 
 --usernameAvailable: Returns if the username is available to use or not.
 function usernameAvailable(username,available)
@@ -315,6 +324,30 @@ function usernameAvailable(username,available)
 	end
 end
 addEventHandler("returnUsernameAvailability",root,usernameAvailable)
+
+--onAccountRegistered: Switch from register to login for the player.
+function onAccountRegistered(state,username,password)
+	if state then
+		guiSetVisible(windows["login"],true)
+		guiSetVisible(windows["register"],false)
+		returnUpdateStatus("login","Your account "..username.." was successfully registered. Press login to get going!")
+		
+		--Enter the account information in for the player
+		guiSetText(edits["login-username"],username)
+		guiSetText(edits["login-password"],password)
+		guiCheckBoxSetSelected(checkboxes["remember"],true)
+		
+		--Update cache
+		setCacheData("username",username)
+		setCacheData("password",password)
+		setCacheData("remember","true")
+		setCacheData("encrypted","true")
+	else
+		returnUpdateStatus("register","An unexpected issue has occured while registering, please try again or contact an admin.")
+		return
+	end
+end
+addEventHandler("onAccountRegistered",root,onAccountRegistered)
 
 --toggleAccountWindows: Misc function for Characters (check accounts_characters.lua)
 function toggleAccountWindows(state)

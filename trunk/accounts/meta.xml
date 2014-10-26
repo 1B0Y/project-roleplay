@@ -28,6 +28,10 @@
 		<export function="getPlayerAccount" type="server"/>
 		<export function="isPlayerLoggedIn" type="server"/>
 	
+	<!-- Included Resources-->
+	<include resource="database"/>
+	<include resource="utils"/>
+	
 	<!-- File stuff -->
 	<file src="images/mtalogo.png"/>
 	<file src="images/nope.jpg"/>
