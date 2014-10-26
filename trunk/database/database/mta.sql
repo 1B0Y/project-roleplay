@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: 127.0.0.1
--- Generation Time: Oct 25, 2014 at 06:48 PM
+-- Generation Time: Oct 26, 2014 at 09:46 PM
 -- Server version: 5.6.20
 -- PHP Version: 5.5.15
 
@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 `id` int(11) NOT NULL COMMENT 'Player''s unique account ID',
   `username` varchar(22) NOT NULL COMMENT 'Player''s username',
   `password` char(64) NOT NULL COMMENT 'Player''s password (encrypted)',
-  `email` tinytext NOT NULL COMMENT 'Player''s email',
+  `email` tinytext COMMENT 'Player''s email',
+  `serial` char(32) DEFAULT NULL,
   `lastlogin` datetime NOT NULL COMMENT 'Player''s last login date'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
