@@ -6,6 +6,8 @@
 ]]--
 
 local accountData = {} --Data cache
+local _setAccountData = setAccountData
+local _getAccountData = getAccountData
 
 function loadAccountData(player,username)
 	if player and isElement(player) and username then
@@ -26,13 +28,22 @@ function cacheAccountData(query,player,username)
 	if (results) then
 		if (#results >= 1) then
 			for k,v in ipairs(results) do
-				accountData[username][v.key] = v.value --Thx, ixjf @ #mta.scripting!
+				outputDebugString("Key: "..tostring(v.name)..", Value: "..tostring(v.value))
+				accountData[username][tostring(v.name)] = v.value --Thx, ixjf @ #mta.scripting!
 			end
 		end
 	end
 	
 	triggerEvent("onAccountDataLoaded",player,username)
 	return true
+end
+
+function isAccountDataLoaded(username)
+	if (accountData[username]) then
+		return true
+	else
+		return false
+	end
 end
 
 function getAllAccountData(username)
@@ -44,7 +55,7 @@ function getAccountData(username,key)
 		return false
 	end
 	
-	return accountData[username][key]
+	return accountData[username][key] or false
 end
 
 function setAccountData(username,key,value)
@@ -54,25 +65,12 @@ function setAccountData(username,key,value)
 	
 	local connection = exports.database:getConnection()
 	if not connection then return false end
-	
+		
 	if not (accountData[username][key]) then
-		dbExec(connection,"INSERT INTO accountdata (username,key,value) VALUES (?,?,?)",username,tostring(key),tostring(value))
+		dbExec(connection,"INSERT INTO accountdata (username,name,value) VALUES (?,?,?)",tostring(username),tostring(key),tostring(value)) --Update the accountdata
 	end
 	
 	accountData[username][key] = value
-	return true
-end
-
-function saveAccountData(username)
-	if not (accountData[username]) then
-		return false
-	end
-	
-	local connection = exports.database:getConnection()
-	if not connection then return false end
-	
-	for k,v in ipairs(accountData[username]) do
-		dbExec(connection,"UPDATE accountData SET ??=? WHERE username=?",v.key,v.value,username)
-	end
+	dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(value),tostring(key),tostring(username))
 	return true
 end

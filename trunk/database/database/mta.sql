@@ -28,8 +28,8 @@ SET time_zone = "+00:00";
 
 CREATE TABLE IF NOT EXISTS `accountdata` (
 `id` int(11) NOT NULL COMMENT 'Unique ID',
-  `username` int(11) NOT NULL COMMENT 'Player''s account ID',
-  `key` tinytext NOT NULL COMMENT 'Key name',
+  `username` varchar(255) NOT NULL COMMENT 'Player''s account ID',
+  `name` tinytext NOT NULL COMMENT 'Key name',
   `value` text NOT NULL COMMENT 'Key value'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS `accountdata` (
 
 CREATE TABLE IF NOT EXISTS `accounts` (
 `id` int(11) NOT NULL COMMENT 'Player''s unique account ID',
-  `username` varchar(22) NOT NULL COMMENT 'Player''s username',
+  `username` varchar(255) NOT NULL COMMENT 'Player''s username',
   `password` char(64) NOT NULL COMMENT 'Player''s password (encrypted)',
   `email` tinytext COMMENT 'Player''s email',
   `serial` char(32) DEFAULT NULL,
