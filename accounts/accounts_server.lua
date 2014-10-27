@@ -175,6 +175,8 @@ function register(username,password,email)
 			return
 		end
 		
+		password = sha256(password)
+		
 		--Create the account
 		if (dbExec(connection,"INSERT INTO accounts (username,password,email,lastlogin) VALUES (?,?,?,now())",username,password,email or "NULL")) then
 			triggerClientEvent(client,"onAccountRegistered",client,true,username,password)
