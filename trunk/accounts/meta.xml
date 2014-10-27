@@ -2,14 +2,17 @@
 	<info author="Jack" name="Accounts" description="Account Manager" version="1.0"/>
 	
 	<!-- Core scripts -->
-	<script src="accounts_client.lua" type="client"/>
-	<script src="accounts_character.lua" type="client"/>
-	<script src="accounts_server.lua" type="server"/>
+	<script src="accounts.lua" type="client"/>
+	<script src="accounts.slua" type="server"/>
 	<script src="accounts_exports.lua" type="server"/>
+	
+	<!-- Characters-->
+	<script src="accounts_character.lua" type="client"/>
+	<script src="accounts_character.slua" type="server"/>
 	
 	<!-- Data storage -->
 	<script src="accounts_cache.lua" type="client"/>
-	<script src="accounts_database.lua"  type="server"/>
+	<script src="accounts_database.slua"  type="server"/>
 	
 	<!-- Exports -->
 	

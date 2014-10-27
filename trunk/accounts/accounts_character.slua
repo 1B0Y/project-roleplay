@@ -1,0 +1,56 @@
+--[[
+	Project: SourceMode
+	Version: 1.0
+	Last Edited: 27/10/2014 (Jack)
+	Authors: Jack
+]]--
+
+addEvent("onPlayerSelectCharacter",true)
+
+local defPosition = "[ [ 0, 0, 10, 0 ] ]"
+
+function onCharacterSelected(data)
+	if (data) then
+		local skin = data.model		
+		local account = getPlayerAccount(client)
+		local health = getAccountData(account,"health") or 100
+		local armor = getAccountData(account,"armor") or 0
+		local interior = getAccountData(account,"interior") or 0
+		local dimension = getAccountData(account,"dimension") or 0
+		local weapons = getAccountData(account,"weapons") or {}
+		local position = getAccountData(account,"position")
+		local position = fromJSON(position)
+		local x,y,z,rot = position[1],position[2],position[3],position[4]
+		
+		--quick health check
+		if math.floor(health) <= 0 then
+			health = 0
+		end
+		
+		triggerClientEvent(client,"toggleGUI",client,"all",false) --Close all client windows
+		triggerClientEvent(client,"toggleGUI",client,"hud",true) --Close all client windows
+		showCursor(client,false)
+		fadeCamera(client,false,1.0,0,0,0)
+		outputDebugString("X: "..x..", Y: "..y..", Z: "..z..", ROT: "..rot)
+		setTimer(fadeCamera,1000,1,client,true,1.0)
+		setTimer(setCameraTarget,1000,1,client)
+		setTimer(spawnPlayer,1000,1,client,tonumber(x),tonumber(y),tonumber(z),rot,skin,interior,dimension,getTeamFromName("Players"))
+		setTimer(setElementHealth,1000,1,client,health)
+		setTimer(setPedArmor,1000,1,client,armor)
+		
+		--Trigger a global event for the other scripts
+		triggerEvent("onPlayerJoinGame",client)
+		
+		--Spawn weapons
+		for k,v in ipairs(weapons) do
+			giveWeapon(client,tonumber(v.wepID),tonumber(v.ammo))
+		end
+		
+		outputChatBox("Welcome back, "..getPlayerName(client)..".",client,0,255,0)
+		outputChatBox(getPlayerName(client).." has joined the game.",client,0,255,0)
+		return true
+	else
+		return false
+	end
+end
+addEventHandler("onPlayerSelectCharacter",root,onCharacterSelected)
