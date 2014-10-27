@@ -36,7 +36,7 @@ local cameras = {
 ]]
 function onStart()
 	for k,v in ipairs(getElementsByType("player")) do
-		switchCamera(v,"main")
+		setTimer(switchCamera,250,1,v,"main")
 		showPlayerHudComponent(v,"all",false)
 	end
 	
