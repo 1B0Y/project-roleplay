@@ -345,22 +345,31 @@ function onAccountRegistered(state,username,password)
 end
 addEventHandler("onAccountRegistered",root,onAccountRegistered)
 
-function toggleWindows(window,state)
-	if (window == "all") then
-		guiSetVisible(windows["login"],state)
-		guiSetVisible(windows["NOPE"],state)
-		guiSetVisible(windows["register"],state)
-		guiSetVisible(windows["recovery"],state)
-		toggleCharacterWindows("all",state) --Turn off character windows aswell.
+function toggleWindows(window,state,feature)
+	if (feature == "characters") then
+		toggleCharacterWindows(window,state) --Turn off character windows aswell.
 		if state then guiSetInputMode("no_binds") else guiSetInputMode("allow_binds") end
-	elseif (window == "hud") then
-		showPlayerHudComponent("all",state)
 	else
-		if (windows[window]) then
-			guiSetVisible(windows[window],state)
-		elseif (window == "characters") or (window == "characters_create") then --We'll allow characters window control from here.
-			toggleCharacterWindows(window,state)
+		if (window == "all") then
+			guiSetVisible(windows["login"],state)
+			guiSetVisible(windows["NOPE"],state)
+			guiSetVisible(windows["register"],state)
+			guiSetVisible(windows["recovery"],state)
+			if state then guiSetInputMode("no_binds") else guiSetInputMode("allow_binds") end
+		elseif (window == "hud") then
+			showPlayerHudComponent("all",state)
+		else
+			if (windows[window]) then
+				guiSetVisible(windows[window],state)
+			elseif (window == "characters") or (window == "characters_create") then --We'll allow characters window control from here.
+				toggleCharacterWindows(window,state)
+			end
 		end
 	end
 end
 addEventHandler("toggleGUI",root,toggleWindows)
+
+function logout()
+	triggerServerEvent("onPlayerAttemptLogout",localPlayer)
+end
+addCommandHandler("tLogout",logout)

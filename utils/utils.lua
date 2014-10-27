@@ -27,3 +27,7 @@ function getGUICenter(rX,rY,width,height)
 	end
 	return false
 end
+
+function getPlayerWeapons(player)
+	return {}
+end
