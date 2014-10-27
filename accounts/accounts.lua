@@ -352,6 +352,9 @@ function toggleWindows(window,state)
 		guiSetVisible(windows["register"],state)
 		guiSetVisible(windows["recovery"],state)
 		toggleCharacterWindows("all",state) --Turn off character windows aswell.
+		if state then guiSetInputMode("no_binds") else guiSetInputMode("allow_binds") end
+	elseif (window == "hud") then
+		showPlayerHudComponent("all",state)
 	else
 		if (windows[window]) then
 			guiSetVisible(windows[window],state)
