@@ -76,5 +76,6 @@ function setAccountData(username,key,value)
 	
 	accountData[username][key] = value
 	dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(value),tostring(key),tostring(username))
+	outputDebugString("Key: "..key..", Value: "..value)
 	return true
 end

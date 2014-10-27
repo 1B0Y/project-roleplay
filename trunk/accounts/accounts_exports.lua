@@ -15,5 +15,6 @@ end
 --isPlayerLoggedIn: returns (boolean) true if player is logged in, false otherwise.
 function isPlayerLoggedIn(player)
 	if not player or not isElement(player) or not (getElementType(player) == "player") then return false end
-	if getElementData(player,"username") ~= nil then return true else return false end
+	
+	if getElementData(player,"username") then return true else return false end
 end

@@ -9,7 +9,7 @@ local windows = {}
 local gridlists = {}
 local buttons = {}
 local pedPosition = {1994.044921875, 1580.0517578125, 17.5625, 17}
-local characters --local copy of the player's characters
+local _characters --local copy of the player's characters
 local selectedChar --Currently selected character
 local character --ped
 
@@ -68,7 +68,7 @@ function loadCharacterData(data)
 		guiGridListSetItemText(gridlists["characters"],row,characters,"You have no characters!",false,false)
 	end
 	
-	characters = fromJSON(data) --Store this for later use.
+	_characters = fromJSON(data) --Store this for later use.
 	setTimer(guiSetVisible,1000,1,windows["characters"],true)
 	setTimer(guiSetVisible,1000,1,buttons["play"],true)
 	setTimer(fadeCamera,1000,1,true,1.0)
@@ -85,6 +85,7 @@ function onCharacterClick(button,state)
 		elseif (source == buttons["play"]) then
 			if (character) then
 				triggerServerEvent("onPlayerSelectCharacter",localPlayer,character)
+				if ped and isElement(ped) then destroyElement(ped) end
 				character = nil --Clear some memory for the client
 			else
 				return false --no idea how he gets passed this.
@@ -99,7 +100,7 @@ function processCharacter()
 	if (row ~= -1 and columns ~= 1) then
 		local charName = guiGridListGetItemText(gridlists["characters"],row,1)
 		if charName then
-			for k,v in ipairs(characters) do
+			for k,v in ipairs(_characters) do
 				if (v.charName == charName) then
 					character = v
 					break
@@ -120,7 +121,7 @@ function processCharacter()
 	
 	if ped and isElement(ped) then destroyElement(ped) end
 	guiSetEnabled(buttons["play"],false)
-	character = nil
+	_character = nil
 	return false
 end
 

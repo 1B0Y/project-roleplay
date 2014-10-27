@@ -5,4 +5,5 @@
 	
 	<export function="convertToBool" type="shared"/>
 	<export function="getGUICenter" type="shared"/>
+	<export function="getPlayerWeapons" type="shared"/>
 </meta>

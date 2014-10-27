@@ -6,6 +6,7 @@
 ]]--
 
 addEvent("onPlayerSelectCharacter",true)
+addEvent("onPlayerLoggedOut",true)
 
 local defPosition = "[ [ 0, 0, 10, 0 ] ]"
 
@@ -17,21 +18,26 @@ function onCharacterSelected(data)
 		local armor = getAccountData(account,"armor") or 0
 		local interior = getAccountData(account,"interior") or 0
 		local dimension = getAccountData(account,"dimension") or 0
-		local weapons = getAccountData(account,"weapons") or {}
+		local weapons = getAccountData(account,"weapons") or "[]"
+		local weapons = fromJSON(weapons)
 		local position = getAccountData(account,"position")
 		local position = fromJSON(position)
-		local x,y,z,rot = position[1],position[2],position[3],position[4]
+		local x,y,z,rot = position[1],position[2],position[3]+1,position[4]
 		
 		--quick health check
 		if math.floor(health) <= 0 then
 			health = 0
 		end
 		
-		triggerClientEvent(client,"toggleGUI",client,"all",false) --Close all client windows
+		--Calling triggers, storing stuff, etc.
+		triggerClientEvent(client,"toggleGUI",client,"all",false,"characters") --Close all client windows
 		triggerClientEvent(client,"toggleGUI",client,"hud",true) --Close all client windows
 		showCursor(client,false)
 		fadeCamera(client,false,1.0,0,0,0)
-		outputDebugString("X: "..x..", Y: "..y..", Z: "..z..", ROT: "..rot)
+		setElementData(client,"character",data.charName)
+		
+		
+		--Spawning and stuff
 		setTimer(fadeCamera,1000,1,client,true,1.0)
 		setTimer(setCameraTarget,1000,1,client)
 		setTimer(spawnPlayer,1000,1,client,tonumber(x),tonumber(y),tonumber(z),rot,skin,interior,dimension,getTeamFromName("Players"))
@@ -54,3 +60,50 @@ function onCharacterSelected(data)
 	end
 end
 addEventHandler("onPlayerSelectCharacter",root,onCharacterSelected)
+
+function onCharacterChange(player)
+	if player and isElement(player) then
+		--Force save the character data
+		if not (getElementData(player,"character")) then return false end
+		onCharacterQuit()
+		setTimer(triggerClientEvent,1000,1,player,"toggleGUI",player,"all",true,"characters")
+		switchCamera(player,"character")
+		showCursor(player,true)
+	end
+end
+addCommandHandler("change",onCharacterChange)
+
+function onPlayerLogout()
+	if source and isElement(source) then
+		if not (getElementData(source,"character")) then return false end
+		onCharacterQuit(source)
+	end
+end
+addEventHandler("onPlayerLoggedOut",root,onPlayerLogout)
+
+function onCharacterQuit(player)
+	if not player then
+		player = source
+	end
+	
+	if player and isElement(player) then
+		if not getElementData(player,"character") then return false end
+		local account = getPlayerAccount(player) or account
+		setAccountData(account,"health",getElementHealth(player))
+		setAccountData(account,"armor",getPedArmor(player))
+		setAccountData(account,"interior",getElementInterior(player))
+		setAccountData(account,"dimension",getElementDimension(player))
+		
+		local weapons = toJSON(exports.utils:getPlayerWeapons(player)) or "[]"
+		setAccountData(account,"weapons",weapons)
+		
+		local x,y,z = getElementPosition(player)
+		local _,_,rot = getElementRotation(player)
+		local position = toJSON({x,y,z,rot})
+		setAccountData(account,"position",position)
+		
+		removeElementData(player,"character")
+		outputChatBox(getPlayerName(player).." left the game.",root,255,0,0)
+	end
+end
+addEventHandler("onPlayerQuit",root,onCharacterQuit)
