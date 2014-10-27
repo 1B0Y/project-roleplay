@@ -7,8 +7,10 @@
 
 addEvent("onPlayerSelectCharacter",true)
 addEvent("onPlayerLoggedOut",true)
+addEvent("onPlayerAddCharacter",true)
+addEvent("isCharacterNameAvaialble",true)
 
-local defPosition = "[ [ 0, 0, 10, 0 ] ]"
+local defPosition = "[ [ 0, 0, 10, 0 ] ]" --We'll change this later to something more appropiate.
 
 function onCharacterSelected(data)
 	if (data) then
@@ -52,8 +54,7 @@ function onCharacterSelected(data)
 			giveWeapon(client,tonumber(v.wepID),tonumber(v.ammo))
 		end
 		
-		outputChatBox("Welcome back, "..getPlayerName(client)..".",client,0,255,0)
-		outputChatBox(getPlayerName(client).." has joined the game.",client,0,255,0)
+		outputChatBox(getPlayerName(client).." has joined the game.",root,0,255,0)
 		return true
 	else
 		return false
@@ -107,3 +108,40 @@ function onCharacterQuit(player)
 	end
 end
 addEventHandler("onPlayerQuit",root,onCharacterQuit)
+
+function addCharacter(name,skin)
+	if client and isElement(client) then
+		if not (type(name) ~= "string") or not (#name >= 3) then
+			triggerClientEvent(client,"returnCreateStatus",client,"Your character name must be more than 3 chars!")
+			return
+		end
+		
+		local account = getPlayerAccount(client)
+		local characters = getAccountData(account,"characters")
+		local characters = fromJSON(characters) or {}
+		
+		table.insert(characters,{charName=name,model=skin})
+		setAccountData(account,"characters",toJSON(characters))
+		triggerClientEvent(client,"onCharacterAdded",client)
+	end
+end
+addEventHandler("onPlayerAddCharacter",root,addCharacter)
+
+function isCharacterNameAvailable(name)
+	if client and isElement(client) then
+		local account = getPlayerAccount(client)
+		local characters = getAccountData(account,"characters")
+		local characters = fromJSON(characters) or {}
+		
+		local found = false
+		for k,v in ipairs(characters) do
+			if (v.charName == name) then
+				found = true
+				break
+			end
+		end
+		
+		triggerClientEvent(client,"returnCharacterNameAvailability",client,name,found)
+	end
+end
+addEventHandler("isCharacterNameAvaialble",root,isCharacterNameAvailable)

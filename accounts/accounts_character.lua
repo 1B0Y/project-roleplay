@@ -8,15 +8,24 @@
 local windows = {}
 local gridlists = {}
 local buttons = {}
+local edits = {}
+local labels = {}
+
 local pedPosition = {1994.044921875, 1580.0517578125, 17.5625, 17}
 local _characters --local copy of the player's characters
 local selectedChar --Currently selected character
 local character --ped
 
 addEvent("onCharacterDataLoaded",true)
+addEvent("returnCreateStatus",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize()
+	
+	--[[
+		Character Selection
+		Version 1
+	]]
 	local width,height = 304, 425
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
 	windows["characters"] = guiCreateWindow(rX-width-5,Y,width,height, "SourceMode - Your Characters", false)
@@ -33,17 +42,45 @@ function onStart()
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height) --get center stuff
 	buttons["play"] = guiCreateButton(X,Y+((Y/2)*1.6),width,height, "LET'S PARTY!", false)
 	
+	--[[
+		Character Creation
+		Version 1
+	]]
+	local width,height = 284, 250
+	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
+	windows["create"] = guiCreateWindow(X,Y,width,height, "SourceMode - Create New Character", false)
+	guiWindowSetSizable(windows["create"], false)
+	char = guiCreateLabel(9, 21, 265, 23, "Character Name", false, windows["create"])
+	edits["character-name"] = guiCreateEdit(9, 44, 265, 28, "", false, windows["create"])
+	labels["character-id"] = guiCreateLabel(74, 142, 135, 30, "[SKIN NAME] (ID)", false, windows["create"])
+	labels["character-status"] = guiCreateLabel(9, 72, 265, 69, "Please enter a character name", false, windows["create"])
+	buttons["left"] = guiCreateButton(19, 142, 55, 30, "<", false, windows["create"])
+	buttons["right"] = guiCreateButton(209, 142, 55, 30, ">", false, windows["create"])
+	buttons["create"] = guiCreateButton(29, 178, 225, 25, "Create Character", false, windows["create"])
+	buttons["back"] = guiCreateButton(29, 208, 225, 25, "Back to Characters", false, windows["create"])
+	
+	--GUI stuff
+	guiSetFont(char, "default-bold-small")
+	guiLabelSetColor(char, 255, 101, 101)
+	guiLabelSetHorizontalAlign(char, "center", false)
+	guiLabelSetVerticalAlign(char, "center")
+	guiLabelSetColor(labels["character-id"], 255, 150, 0)
+	guiLabelSetHorizontalAlign(labels["character-id"], "center", false)
+	guiLabelSetVerticalAlign(labels["character-id"], "center")
+	guiLabelSetColor(labels["character-status"], 140, 255, 100)
+	guiLabelSetHorizontalAlign(labels["character-status"], "center", true)
+	
 	--button eventhandlers
 	addEventHandler("onClientGUIClick",buttons["logout"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",buttons["play"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",gridlists["characters"],onCharacterClick,false)
 	
 	guiSetVisible(windows["characters"],false)
+	guiSetVisible(windows["create"],false)
 	guiSetVisible(buttons["play"],false)
 	guiSetEnabled(buttons["play"],false)
 	guiSetEnabled(buttons["create"],false)
 	guiSetEnabled(buttons["delete"],false)
-	guiSetEnabled(buttons["logout"],false)
 end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)
 
@@ -138,3 +175,12 @@ function toggleCharacterWindows(window,state)
 		end
 	end
 end
+
+function checkCharacterName()
+	triggerServerEvent("isCharacterNameAvaialble",localPlayer,name)
+end
+
+function characterReturnMessage(message)
+	--....
+end
+addEventHandler("returnCreateStatus",root,characterReturnMessage)
