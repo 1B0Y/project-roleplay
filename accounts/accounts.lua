@@ -20,7 +20,8 @@ addEvent("onPlayerLoggedIn",true)
 addEvent("returnUpdateStatus",true)
 addEvent("returnUsernameAvailability",true)
 addEvent("onAccountRegistered",true)
-addEvent("toggleGUI",true)
+addEvent("accounts:toggleGUI",true)
+addEvent("setPlayerGaming",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize() --Get the player's screen resolution (so we can make sure GUI fits in all resolutions)
@@ -345,29 +346,26 @@ function onAccountRegistered(state,username,password)
 end
 addEventHandler("onAccountRegistered",root,onAccountRegistered)
 
-function toggleWindows(window,state,feature)
-	if (feature == "characters") then
-		toggleCharacterWindows(window,state) --Turn off character windows aswell.
-		if state then guiSetInputMode("no_binds") else guiSetInputMode("allow_binds") end
+function accountGUIManager(window,fade,state)
+	if window == "all" then
+		guiSetVisible(windows["login"],state)
+		guiSetVisible(windows["register"],state)
+		guiSetVisible(windows["recovery"],state)
+		guiSetVisible(windows["NOPE"],state)
 	else
-		if (window == "all") then
-			guiSetVisible(windows["login"],state)
-			guiSetVisible(windows["NOPE"],state)
-			guiSetVisible(windows["register"],state)
-			guiSetVisible(windows["recovery"],state)
-			if state then guiSetInputMode("no_binds") else guiSetInputMode("allow_binds") end
-		elseif (window == "hud") then
-			showPlayerHudComponent("all",state)
-		else
-			if (windows[window]) then
-				guiSetVisible(windows[window],state)
-			elseif (window == "characters") or (window == "characters_create") then --We'll allow characters window control from here.
-				toggleCharacterWindows(window,state)
-			end
+		if (windows[window]) then
+			guiSetVisible(windows[window],state)
 		end
 	end
 end
-addEventHandler("toggleGUI",root,toggleWindows)
+addEventHandler("accounts:toggleGUI",root,accountGUIManager)
+
+--Disable cursor and input modes
+function setPlayerGaming(state)
+	showCursor(not state)
+	if state then guiSetInputMode("allow_binds") else guiSetInputMode("no_binds") end
+end
+addEventHandler("setPlayerGaming",root,setPlayerGaming)
 
 function logout()
 	triggerServerEvent("onPlayerAttemptLogout",localPlayer)
