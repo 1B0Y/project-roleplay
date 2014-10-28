@@ -1,147 +1,215 @@
 --[[
 	Project: SourceMode
-	Version: 1.0
+	Version: 1.1
 	Last Edited: 27/10/2014 (Jack)
 	Authors: Jack
 ]]--
 
-addEvent("onPlayerSelectCharacter",true)
+--Custom events
 addEvent("onPlayerLoggedOut",true)
 addEvent("onPlayerAddCharacter",true)
-addEvent("isCharacterNameAvaialble",true)
+addEvent("onPlayerDeleteCharacter",true)
+addEvent("onPlayerSelectCharacter",true)
+addEvent("onPlayerChangeCharacter",true)
+addEvent("isCharacterNameAvailable",true)
 
-local defPosition = "[ [ 0, 0, 10, 0 ] ]" --We'll change this later to something more appropiate.
+--Some vars we need
+local defPosition = "[ [ 0, 0, 2, 0 ] ]"
+local defWeapons = "[ [ ] ]"
+local defSkins = "[ [ ] ]"
 
-function onCharacterSelected(data)
-	if (data) then
-		local skin = data.model		
-		local account = getPlayerAccount(client)
-		local health = getAccountData(account,"health") or 100
-		local armor = getAccountData(account,"armor") or 0
-		local interior = getAccountData(account,"interior") or 0
-		local dimension = getAccountData(account,"dimension") or 0
-		local weapons = getAccountData(account,"weapons") or "[]"
-		local weapons = fromJSON(weapons)
-		local position = getAccountData(account,"position")
-		local position = fromJSON(position)
-		local x,y,z,rot = position[1],position[2],position[3]+1,position[4]
-		
-		--quick health check
-		if math.floor(health) <= 0 then
-			health = 0
-		end
-		
-		--Calling triggers, storing stuff, etc.
-		triggerClientEvent(client,"toggleGUI",client,"all",false,"characters") --Close all client windows
-		triggerClientEvent(client,"toggleGUI",client,"hud",true) --Close all client windows
-		showCursor(client,false)
-		fadeCamera(client,false,1.0,0,0,0)
-		setElementData(client,"character",data.charName)
-		
-		
-		--Spawning and stuff
-		setTimer(fadeCamera,1000,1,client,true,1.0)
-		setTimer(setCameraTarget,1000,1,client)
-		setTimer(spawnPlayer,1000,1,client,tonumber(x),tonumber(y),tonumber(z),rot,skin,interior,dimension,getTeamFromName("Players"))
-		setTimer(setElementHealth,1000,1,client,health)
-		setTimer(setPedArmor,1000,1,client,armor)
-		
-		--Trigger a global event for the other scripts
-		triggerEvent("onPlayerJoinGame",client)
-		
-		--Spawn weapons
-		for k,v in ipairs(weapons) do
-			giveWeapon(client,tonumber(v.wepID),tonumber(v.ammo))
-		end
-		
-		outputChatBox(getPlayerName(client).." has joined the game.",root,0,255,0)
-		return true
-	else
-		return false
-	end
+function onPlayerSelectCharacter(data)
+	if not client or not isElement(client) then return false end
+	if not isPlayerLoggedIn(client) then return false end
+	if not data then return false end
+	
+	spawnCharacter(client,data)
+	triggerClientEvent(client,"characters:toggleGUI",client,"all",true,false)
+	triggerClientEvent(client,"setPlayerGaming",client,true)
+	outputChatBox(getPlayerName(client).." has joined the game.",root,0,255,0)
+	return true
 end
-addEventHandler("onPlayerSelectCharacter",root,onCharacterSelected)
+addEventHandler("onPlayerSelectCharacter",root,onPlayerSelectCharacter)
 
-function onCharacterChange(player)
-	if player and isElement(player) then
-		--Force save the character data
-		if not (getElementData(player,"character")) then return false end
-		onCharacterQuit()
-		setTimer(triggerClientEvent,1000,1,player,"toggleGUI",player,"all",true,"characters")
-		switchCamera(player,"character")
-		showCursor(player,true)
-	end
+function onPlayerChangeCharacter()
+	if not client or not isElement(client) then return false end
+	despawnCharacter(client)
+	triggerClientEvent(client,"characters:toggleGUI",client,"all",true,true)
+	triggerClientEvent(client,"setPlayerGaming",client,false)
 end
-addCommandHandler("change",onCharacterChange)
+addEventHandler("onPlayerChangeCharacter",root,onPlayerChangeCharacter)
 
-function onPlayerLogout()
-	if source and isElement(source) then
-		if not (getElementData(source,"character")) then return false end
-		onCharacterQuit(source)
-	end
+function onPlayerLoggedOut()
+	if not source or not isElement(source) then return false end
+	despawnCharacter(source)
+	triggerClientEvent(source,"characters:toggleGUI",source,"all",true,false)
 end
-addEventHandler("onPlayerLoggedOut",root,onPlayerLogout)
+addEventHandler("onPlayerLoggedOut",root,onPlayerLoggedOut)
 
-function onCharacterQuit(player)
-	if not player then
-		player = source
+function onPlayerQuit()
+	if not source or not isElement(source) then return false end
+	despawnCharacter(source)
+end
+addEventHandler("onPlayerQuit",root,onPlayerQuit)
+
+function sendPlayerCharacters()
+	if not source or not isElement(source) then return false end
+	if not isPlayerLoggedIn(source) then return false end
+	
+	local characters = loadCharacterData(source)
+	triggerClientEvent(source,"sendPlayerCharacters",source,characters)
+	triggerClientEvent(source,"characters:toggleGUI",source,"characters",true,true)
+	triggerClientEvent(source,"characters:toggleGUI",source,"play",true,true)
+	switchCamera(player,"character")
+end
+addEventHandler("onAccountDataLoaded",root,sendPlayerCharacters)
+	
+
+--[[
+					PRE-SCRIPTED FUNCTIONS BELOW, DON'T TOUCH!
+]]
+
+--loadCharacterData
+function loadCharacterData(player)
+	if not player or not isElement(player) then return false end
+	if not isPlayerLoggedIn(player) then return false end
+	if not isAccountDataLoaded(getPlayerAccount(player)) then return false end
+		
+	local account = getPlayerAccount(player)
+	local characters = getAccountData(account,"characters") or "[ [ ] ]"
+	return characters
+end
+
+--spawnCharacter
+function spawnCharacter(player,data)
+	--make sure we have all required info before we go ahead
+	if not player or not isElement(player) then return false end
+	if not isPlayerLoggedIn(player) then return false end
+	if not data then return false end
+	
+	--Parse the data we need
+	account = getPlayerAccount(player)
+	health = getAccountData(account,"health") or 100
+	armor = getAccountData(account,"armor") or 0
+	interior = getAccountData(account,"interior") or 0
+	dimension = getAccountData(account,"dimension") or 0
+	weapons = fromJSON(getAccountData(account,"weapons") or defWeapons)
+	position = fromJSON(getAccountData(account,"position") or defPosition)
+	x,y,z = position[1],position[2],position[3],position[4]
+	if (math.floor(health) <= 0) then health = 0 end
+	
+	--do some prepping
+	fadeCamera(player,false,1.0,0,0,0)
+	setElementFrozen(player,false)
+	triggerClientEvent(player,"characters:toggleGUI",player,"input",nil,false)
+	showCursor(player,false)
+	showPlayerHudComponent(player,"all",true)
+	
+	--spawn
+	setTimer(
+		function()
+			fadeCamera(player,true,1.0)
+			spawnPlayer(player,x,y,z,rot,skin,interior,dimension,getTeamFromName("Player"))
+			setCameraTarget(player)
+			setElementHealth(player,health)
+			setPedArmor(player,armor)
+		end, 1000, 1
+	)
+	
+	return true
+end
+	
+--despawnCharacter
+function despawnCharacter(player)
+	if not player or not isElement(player) then return false end
+	
+	setElementDimension(player,1)
+	setElementPosition(player,0,0,-5)
+	setElementFrozen(player,true)
+	saveCharacterData(player)
+end
+
+--saveCharacterData
+function saveCharacterData(player)
+	--Make sure we have no bad stuff. If we do, we'll stop here.
+	if not player or not isElement(player) then return false end
+	if not isPlayerLoggedIn(player) then return false end
+	if not (getElementData(player,"character")) then return false end --He was never spawned.
+	
+	--Get all our vars ready
+	local account = getPlayerAccount(player)
+	local weapons = toJSON(exports.utils:getPlayerWeapons(client)) or defWeapons
+	local x,y,z = getElementPosition(player)
+	local _,_,rot = getElementRotation(player)
+	local position = toJSON({x,y,z,rot})
+	
+	--Now to update our data!
+	setAccountData(account,"health",getElementHealth(player))
+	setAccountData(account,"armor",getPedArmor(player))
+	setAccountData(account,"interior",getElementInterior(player))
+	setAccountData(account,"dimension",getElementDimension(player))
+	setAccountData(account,"weapons",weapons)
+	setAccountData(account,"position",position)
+end
+
+--addCharacters
+function addCharacter(player,name,skin)
+	--Make sure we have no bad stuff!
+	if not player or not isElement(player) then return false end
+	if not isPlayerLoggedIn(player) then return false end
+	if not name or not #name >= 1 then return false end
+	if not skin then return false end
+	
+	if (isCharacterNameAvailable(player,name) == false) then 
+		return false, name.." is already one of your characters." 
 	end
 	
-	if player and isElement(player) then
-		if not getElementData(player,"character") then return false end
-		local account = getPlayerAccount(player) or account
-		setAccountData(account,"health",getElementHealth(player))
-		setAccountData(account,"armor",getPedArmor(player))
-		setAccountData(account,"interior",getElementInterior(player))
-		setAccountData(account,"dimension",getElementDimension(player))
-		
-		local weapons = toJSON(exports.utils:getPlayerWeapons(player)) or "[]"
-		setAccountData(account,"weapons",weapons)
-		
-		local x,y,z = getElementPosition(player)
-		local _,_,rot = getElementRotation(player)
-		local position = toJSON({x,y,z,rot})
-		setAccountData(account,"position",position)
-		
-		removeElementData(player,"character")
-		outputChatBox(getPlayerName(player).." left the game.",root,255,0,0)
-	end
+	--Get all our vars ready
+	local account = getPlayerAccount(player)
+	local characters = fromJSON(getAccountData(account,"characters") or defSkins)
+	
+	--Add the character
+	table.insert(characters,{charName=name,model=skin})
+	setAccountData(account,"characters",toJSON(characters))
+	return true
 end
-addEventHandler("onPlayerQuit",root,onCharacterQuit)
 
-function addCharacter(name,skin)
-	if client and isElement(client) then
-		if not (type(name) ~= "string") or not (#name >= 3) then
-			triggerClientEvent(client,"returnCreateStatus",client,"Your character name must be more than 3 chars!")
-			return
+--deleteCharacter
+function deleteCharacter(player,name)
+	--Make sure we have no bad stuff!
+	if not player or not isElement(player) then return false end
+	if not isPlayerLoggedIn(player) then return false end
+	if not name or not #name >= 1 then return false end
+	
+	local account = getPlayerAccount(player)
+	local characters = fromJSON(getAccountData(account,"characters") or defSkin)
+	if not (#characters >= 1) then return false end --We have no characters to delete.
+	
+	for k,v in ipairs(characters) do
+		if (v.charName == name) then
+			table.remove(characters,k)
+			return true
 		end
-		
-		local account = getPlayerAccount(client)
-		local characters = getAccountData(account,"characters")
-		local characters = fromJSON(characters) or {}
-		
-		table.insert(characters,{charName=name,model=skin})
-		setAccountData(account,"characters",toJSON(characters))
-		triggerClientEvent(client,"onCharacterAdded",client)
 	end
+	return false
 end
-addEventHandler("onPlayerAddCharacter",root,addCharacter)
 
-function isCharacterNameAvailable(name)
-	if client and isElement(client) then
-		local account = getPlayerAccount(client)
-		local characters = getAccountData(account,"characters")
-		local characters = fromJSON(characters) or {}
-		
-		local found = false
-		for k,v in ipairs(characters) do
-			if (v.charName == name) then
-				found = true
-				break
-			end
+--isCharacterNameAvailable
+function isCharacterNameAvailable(player,name)
+	if not player or not isElement(player) then return false end
+	if not isPlayerLoggedIn(player) then return false end
+	
+	local account = getPlayerAccount(player)
+	local characters = getAccountData(account,"characters") or "[ [ ] ]"
+	local characters = fromJSON(characters)
+	
+	local found = false
+	for k,v in ipairs(characters) do
+		if (v.charName == name) then
+			found = true
+			break
 		end
-		
-		triggerClientEvent(client,"returnCharacterNameAvailability",client,name,found)
 	end
+
+	return not false --If name is true, set it false and vise-versa.
 end
-addEventHandler("isCharacterNameAvaialble",root,isCharacterNameAvailable)

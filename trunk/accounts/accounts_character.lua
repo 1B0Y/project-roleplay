@@ -16,8 +16,9 @@ local _characters --local copy of the player's characters
 local selectedChar --Currently selected character
 local character --ped
 
-addEvent("onCharacterDataLoaded",true)
+addEvent("sendPlayerCharacters",true)
 addEvent("returnCreateStatus",true)
+addEvent("characters:toggleGUI",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize()
@@ -85,8 +86,6 @@ end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)
 
 function loadCharacterData(data)
-	fadeCamera(false,1.0,0,0,0)
-	toggleWindows("all",false)
 	guiGridListClear(gridlists["characters"])
 	if (data) then
 		local data = fromJSON(data) --change back to a table!
@@ -106,12 +105,8 @@ function loadCharacterData(data)
 	end
 	
 	_characters = fromJSON(data) --Store this for later use.
-	setTimer(guiSetVisible,1000,1,windows["characters"],true)
-	setTimer(guiSetVisible,1000,1,buttons["play"],true)
-	setTimer(fadeCamera,1000,1,true,1.0)
-	setTimer(setCameraMatrix,1000,1,1996.044921875, 1577.8408203125, 18.829193115234,1994.5673828125, 1579.44921875, 17.569759368896)
 end
-addEventHandler("onCharacterDataLoaded",root,loadCharacterData)
+addEventHandler("sendPlayerCharacters",root,loadCharacterData)
 
 function onCharacterClick(button,state)
 	if (button == "left" and state == "up") then
@@ -151,6 +146,7 @@ function processCharacter()
 				setElementFrozen(ped,true)
 				setPedAnimation(ped,"DANCING","dance_loop",-1,true,false)
 				guiSetEnabled(buttons["play"],true)
+				setElementDimension(ped,getElementDimension(localPlayer))
 				return true
 			end
 		end
@@ -162,25 +158,19 @@ function processCharacter()
 	return false
 end
 
-function toggleCharacterWindows(window,state)
-	if (window == "all") then
+function characterGUIManager(window,fade,state)
+	if window == "all" then
 		guiSetVisible(windows["characters"],state)
+		guiSetVisible(windows["create"],state)
 		guiSetVisible(buttons["play"],state)
 	else
-		--I should find a cleaner way to do this...
 		if (windows[window]) then
 			guiSetVisible(windows[window],state)
-		elseif (buttons[window]) then
+		end
+		
+		if (buttons[window]) then
 			guiSetVisible(buttons[window],state)
 		end
 	end
 end
-
-function checkCharacterName()
-	triggerServerEvent("isCharacterNameAvaialble",localPlayer,name)
-end
-
-function characterReturnMessage(message)
-	--....
-end
-addEventHandler("returnCreateStatus",root,characterReturnMessage)
+addEventHandler("characters:toggleGUI",root,characterGUIManager)
