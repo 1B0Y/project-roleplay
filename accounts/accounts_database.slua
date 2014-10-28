@@ -75,7 +75,15 @@ function setAccountData(username,key,value)
 	end
 	
 	accountData[username][key] = value
-	dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(value),tostring(key),tostring(username))
+	--dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(value),tostring(key),tostring(username)) --NOT GOOD!
 	outputDebugString("Key: "..key..", Value: "..value)
 	return true
+end
+
+function flushAccountData(username)
+	if not (accountData[username]) then return false end
+	
+	for k,v in pairs(accountData[username]) do
+		dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(value),tostring(key),tostring(username))
+	end
 end
