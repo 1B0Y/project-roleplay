@@ -84,7 +84,7 @@ function onStart()
 	guiSetVisible(windows["creator"],false)
 	guiSetVisible(buttons["play"],false)
 	guiSetEnabled(buttons["play"],false)
-	--guiSetEnabled(buttons["create"],false)
+	guiSetEnabled(buttons["create"],false)
 	guiSetEnabled(buttons["delete"],false)
 end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)

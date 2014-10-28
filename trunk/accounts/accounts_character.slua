@@ -76,7 +76,7 @@ function loadCharacterData(player)
 	if not isAccountDataLoaded(getPlayerAccount(player)) then return false end
 		
 	local account = getPlayerAccount(player)
-	local characters = getAccountData(account,"characters") or "[ [ ] ]"
+	local characters = getAccountData(account,"characters") or '[ [ { "charName": "'..getPlayerName(player)..'", "model": 0 } ] ]'
 	return characters
 end
 
@@ -130,6 +130,7 @@ function despawnCharacter(player)
 	setElementDimension(player,1)
 	setElementPosition(player,0,0,-5)
 	setElementFrozen(player,true)
+	setPlayerMoney(player,0) --Set it to this just incase.
 end
 
 --saveCharacterData
