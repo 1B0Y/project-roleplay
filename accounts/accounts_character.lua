@@ -49,16 +49,18 @@ function onStart()
 	]]
 	local width,height = 284, 250
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
-	windows["create"] = guiCreateWindow(X,Y,width,height, "SourceMode - Create New Character", false)
-	guiWindowSetSizable(windows["create"], false)
-	char = guiCreateLabel(9, 21, 265, 23, "Character Name", false, windows["create"])
-	edits["character-name"] = guiCreateEdit(9, 44, 265, 28, "", false, windows["create"])
-	labels["character-id"] = guiCreateLabel(74, 142, 135, 30, "[SKIN NAME] (ID)", false, windows["create"])
-	labels["character-status"] = guiCreateLabel(9, 72, 265, 69, "Please enter a character name", false, windows["create"])
-	buttons["left"] = guiCreateButton(19, 142, 55, 30, "<", false, windows["create"])
-	buttons["right"] = guiCreateButton(209, 142, 55, 30, ">", false, windows["create"])
-	buttons["create"] = guiCreateButton(29, 178, 225, 25, "Create Character", false, windows["create"])
-	buttons["back"] = guiCreateButton(29, 208, 225, 25, "Back to Characters", false, windows["create"])
+	windows["creator"] = guiCreateWindow(rX-width-5,Y,width,height, "SourceMode - Create New Character", false)
+	guiWindowSetSizable(windows["creator"], false)
+	guiWindowSetMovable(windows["creator"], false)
+	guiSetAlpha(windows["creator"],1)
+	char = guiCreateLabel(9, 21, 265, 23, "Character Name", false, windows["creator"])
+	edits["character-name"] = guiCreateEdit(9, 44, 265, 28, "", false, windows["creator"])
+	labels["character-id"] = guiCreateLabel(74, 142, 135, 30, "[SKIN NAME] (ID)", false, windows["creator"])
+	labels["character-status"] = guiCreateLabel(9, 72, 265, 69, "Please enter a character name", false, windows["creator"])
+	buttons["left"] = guiCreateButton(19, 142, 55, 30, "<", false, windows["creator"])
+	buttons["right"] = guiCreateButton(209, 142, 55, 30, ">", false, windows["creator"])
+	buttons["attemptCreate"] = guiCreateButton(29, 178, 225, 25, "Create Character", false, windows["creator"])
+	buttons["back"] = guiCreateButton(29, 208, 225, 25, "Back to Characters", false, windows["creator"])
 	
 	--GUI stuff
 	guiSetFont(char, "default-bold-small")
@@ -74,16 +76,44 @@ function onStart()
 	--button eventhandlers
 	addEventHandler("onClientGUIClick",buttons["logout"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",buttons["play"],onCharacterClick,false)
+	addEventHandler("onClientGUIClick",buttons["create"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",gridlists["characters"],onCharacterClick,false)
+	addEventHandler("onClientGUIClick",buttons["back"],onCharacterClick,false)
 	
 	guiSetVisible(windows["characters"],false)
-	guiSetVisible(windows["create"],false)
+	guiSetVisible(windows["creator"],false)
 	guiSetVisible(buttons["play"],false)
 	guiSetEnabled(buttons["play"],false)
-	guiSetEnabled(buttons["create"],false)
+	--guiSetEnabled(buttons["create"],false)
 	guiSetEnabled(buttons["delete"],false)
 end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)
+
+function onCharacterClick(button,state)
+	if (button == "left" and state == "up") then
+		if (source == buttons["logout"]) then
+			triggerServerEvent("onPlayerAttemptLogout",localPlayer)
+		elseif (source == gridlists["characters"]) then
+			processCharacter()
+		elseif (source == buttons["create"]) then
+				characterGUIManager("characters",nil,false)
+				characterGUIManager("play",nil,false)
+				characterGUIManager("creator",nil,true)
+		elseif (source == buttons["back"]) then
+			characterGUIManager("creator",nil,false)
+			characterGUIManager("characters",nil,true)
+			characterGUIManager("play",nil,true)
+		elseif (source == buttons["play"]) then
+			if (character) then
+				triggerServerEvent("onPlayerSelectCharacter",localPlayer,character)
+				if ped and isElement(ped) then destroyElement(ped) end
+				character = nil --Clear some memory for the client
+			else
+				return false --no idea how he gets passed this.
+			end
+		end
+	end
+end
 
 function loadCharacterData(data)
 	guiGridListClear(gridlists["characters"])
@@ -107,24 +137,6 @@ function loadCharacterData(data)
 	_characters = fromJSON(data) --Store this for later use.
 end
 addEventHandler("sendPlayerCharacters",root,loadCharacterData)
-
-function onCharacterClick(button,state)
-	if (button == "left" and state == "up") then
-		if (source == buttons["logout"]) then
-			triggerServerEvent("onPlayerAttemptLogout",localPlayer)
-		elseif (source == gridlists["characters"]) then
-			processCharacter()
-		elseif (source == buttons["play"]) then
-			if (character) then
-				triggerServerEvent("onPlayerSelectCharacter",localPlayer,character)
-				if ped and isElement(ped) then destroyElement(ped) end
-				character = nil --Clear some memory for the client
-			else
-				return false --no idea how he gets passed this.
-			end
-		end
-	end
-end
 
 function processCharacter()
 	--First, figure out if we've got anything selected
@@ -161,7 +173,7 @@ end
 function characterGUIManager(window,fade,state)
 	if window == "all" then
 		guiSetVisible(windows["characters"],state)
-		guiSetVisible(windows["create"],state)
+		guiSetVisible(windows["creator"],state)
 		guiSetVisible(buttons["play"],state)
 	else
 		if (windows[window]) then

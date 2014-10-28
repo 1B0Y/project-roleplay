@@ -66,7 +66,7 @@ addEventHandler("onAccountDataLoaded",root,sendPlayerCharacters)
 	
 
 --[[
-					PRE-SCRIPTED FUNCTIONS BELOW, DON'T TOUCH!
+			PRE-SCRIPTED FUNCTIONS BELOW, DON'T TOUCH!			
 ]]
 
 --loadCharacterData
@@ -93,6 +93,7 @@ function spawnCharacter(player,data)
 	armor = getAccountData(account,"armor") or 0
 	interior = getAccountData(account,"interior") or 0
 	dimension = getAccountData(account,"dimension") or 0
+	money = getAccountData(account,"money") or 0
 	weapons = fromJSON(getAccountData(account,"weapons") or defWeapons)
 	position = fromJSON(getAccountData(account,"position") or defPosition)
 	x,y,z = position[1],position[2],position[3],position[4]
@@ -104,6 +105,8 @@ function spawnCharacter(player,data)
 	triggerClientEvent(player,"characters:toggleGUI",player,"input",nil,false)
 	showCursor(player,false)
 	showPlayerHudComponent(player,"all",true)
+	setPlayerMoney(player,money)
+	setElementData(player,"character",data.charName)
 	
 	--spawn
 	setTimer(
@@ -123,10 +126,10 @@ end
 function despawnCharacter(player)
 	if not player or not isElement(player) then return false end
 	
+	saveCharacterData(player)
 	setElementDimension(player,1)
 	setElementPosition(player,0,0,-5)
 	setElementFrozen(player,true)
-	saveCharacterData(player)
 end
 
 --saveCharacterData
@@ -144,12 +147,14 @@ function saveCharacterData(player)
 	local position = toJSON({x,y,z,rot})
 	
 	--Now to update our data!
+	outputDebugString("Saving data..")
 	setAccountData(account,"health",getElementHealth(player))
 	setAccountData(account,"armor",getPedArmor(player))
 	setAccountData(account,"interior",getElementInterior(player))
 	setAccountData(account,"dimension",getElementDimension(player))
 	setAccountData(account,"weapons",weapons)
 	setAccountData(account,"position",position)
+	setAccountData(account,"money",getPlayerMoney(player))
 end
 
 --addCharacters
