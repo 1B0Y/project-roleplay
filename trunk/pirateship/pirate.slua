@@ -9,7 +9,7 @@
 local ships = {}
 local pirates = {} --Get it? :P
 local positions = {
-{x = 1994.8203125, y = 1517.083984375, width = 12, height = 60, movePosition = {x = 2016.7607421875,y = 1531.81640625,z = 11}}
+{x = 1994.8203125, y = 1517.083984375, width = 12, height = 60, movePosition = {x = 2016.7607421875,y = 1531.81640625,z = 11}, heightLimit = 44}
 }
 
 --Custom events
@@ -20,6 +20,7 @@ function onStart()
 		col = createColRectangle(v.x,v.y,v.width,v.height)
 		setElementData(col,"pirate",true) --Prevent greenzone conflict.
 		setElementData(col,"movePosition",v.movePosition)
+		setElementData(col,"height",v.heightLimit)
 		table.insert(ships,col)
 	end
 	
@@ -29,6 +30,9 @@ function onStart()
 		if (#elements >= 1) then
 			for i,element in ipairs(elements) do
 				if (getElementType(element) == "vehicle") then
+					local x,y,z = getElementPosition(element)
+					if (z > v.heightLimit) then return false end
+					
 					moveVehicle(element,v) --This works!
 				elseif (getElementType(element) == "player") then
 					pirates[element] = true
@@ -47,6 +51,9 @@ function pirateColHandler(colshape,event,element,md)
 	
 	if event == "hit" then
 		if (getElementType(element) == "vehicle") then
+			local x,y,z = getElementPosition(element)
+			local limit = getElementData(source,"height")
+			if (z > limit) then return false end
 			moveVehicle(element,source)
 			return
 		elseif (getElementType(element) == "player") then
