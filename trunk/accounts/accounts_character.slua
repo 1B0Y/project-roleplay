@@ -35,6 +35,7 @@ function onPlayerChangeCharacter()
 	despawnCharacter(client)
 	triggerClientEvent(client,"characters:toggleGUI",client,"all",true,true)
 	triggerClientEvent(client,"setPlayerGaming",client,false)
+	flushAccountData(getPlayerAccount(source)) --Force-save the account data
 end
 addEventHandler("onPlayerChangeCharacter",root,onPlayerChangeCharacter)
 
@@ -42,12 +43,14 @@ function onPlayerLoggedOut()
 	if not source or not isElement(source) then return false end
 	despawnCharacter(source)
 	triggerClientEvent(source,"characters:toggleGUI",source,"all",true,false)
+	flushAccountData(getPlayerAccount(source)) --Force-save the account data
 end
 addEventHandler("onPlayerLoggedOut",root,onPlayerLoggedOut)
 
 function onPlayerQuit()
 	if not source or not isElement(source) then return false end
 	despawnCharacter(source)
+	flushAccountData(getPlayerAccount(source)) --Force-save the account data
 end
 addEventHandler("onPlayerQuit",root,onPlayerQuit)
 
