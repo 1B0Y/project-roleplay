@@ -119,6 +119,11 @@ function logIn(username,password,remember,encrypted)
 		end
 		
 		if (results[1].password == password) then
+			if (results[1].banned == 1) then
+				triggerClientEvent(client,"returnUpdateStatus",client,"login","This account is banned!")
+				return
+			end
+			
 			--Make sure we don't allow double-logins! (FUTURE PROJECT)
 			setElementData(client,"username",username)
 			setElementData(client,"ID",results[1].id)
@@ -147,6 +152,8 @@ function logOut()
 		triggerEvent("onPlayerLoggedOut",client)
 		switchCamera(client,"main")
 		showPlayerHudComponent(client,"all",false)
+		removeElementData(client,"username")
+		removeElementData(client,"ID")
 		return true
 	else
 		return false
