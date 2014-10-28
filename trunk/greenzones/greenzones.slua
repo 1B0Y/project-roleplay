@@ -1,0 +1,97 @@
+--[[
+	Project: SourceMode
+	Version: 1.0
+	Last Edited: 28/10/2014 (Jack)
+	Authors: Jack
+]]--
+
+local protected = {} --elements's inside greenzones
+local greenzones = {} --greenzone cols
+local positions = {{x = 1931.6513671, y = 1399.024414, width = 150, height = 300}} --greenzone positions
+
+--Custom events
+addEvent("isPlayerInGreenZone",true)
+
+function onStart()
+	for k,v in ipairs(positions) do
+		radar = createRadarArea(v.x,v.y,v.width,v.height,0,255,0,150)
+		col = createColRectangle(v.x,v.y,v.width,v.height)
+		setElementData(col,"greenzone",true)
+		greenzones[col] = radar
+	end
+	
+	for k,v in pairs(greenzones) do
+		local elements = getElementsWithinColShape(k)
+		if elements and #elements >= 1 then
+			for k,v in ipairs(elements) do
+				if (getElementType(v) == "vehicle") then
+					local occupants = getVehicleOccupants(v)
+					for i,occupant in ipairs(occupants) do
+						outputChatBox("You have entered the greenzone.",occupant,0,255,0)
+						setTimer(triggerClientEvent,250,1,v,"updatePlayerProtection",v,true) --Delay it due to it being onStart
+						protected[occupant] = true
+					end
+					protected[v] = true --Protect the vehicle, too!
+				elseif (getElementType(v) == "player") then
+					setTimer(triggerClientEvent,250,1,v,"updatePlayerProtection",v,true) --Delay it due to it being onStart
+					outputChatBox("You have entered the greenzone.",v,0,255,0)
+					protected[v] = true
+				end
+			end
+		end
+	end
+end
+addEventHandler("onResourceStart",resourceRoot,onStart)
+
+function greenzoneManager(colshape,state,element,dim)
+	if not colshape then return false end
+	if not state then return false end
+	if not element or not isElement(element) then return false end
+	if not dim then return false end
+	if not greenzones[colshape] then return false end
+	if not getElementData(colshape,"greenzone") then return false end
+	
+	if (state == "hit") then
+		if (getElementType(element) == "vehicle") then
+			--Find driver occupants
+			local occupants = getVehicleOccupants(element)
+			for k,v in ipairs(occupants) do
+				outputChatBox("You have entered the greenzone.",v,0,255,0)
+				triggerClientEvent(v,"updatePlayerProtection",v,true)
+				protected[v] = true
+			end
+			protected[element] = true --protect the vehicle too.
+			return true
+		elseif (getElementType(element) == "player") then
+			protected[element] = true
+			triggerClientEvent(element,"updatePlayerProtection",element,true)
+			outputChatBox("You have entered the greenzone.",element,0,255,0)
+			return true
+		end
+	elseif (state == "leave") then
+		if (getElementType(element) == "vehicle") then
+			local occupants = getVehicleOccupants(element)
+			for k,v in ipairs(occupants) do
+				triggerClientEvent(v,"updatePlayerProtection",v,false)
+				outputChatBox("You have left the greenzone.",v,255,0,0)
+				protected[v] = nil
+			end
+			protected[element] = nil
+			return true
+		elseif (getElementType(element) == "player") then
+			protected[element] = nil
+			triggerClientEvent(element,"updatePlayerProtection",element,false)
+			outputChatBox("You have left the greenzone.",element,255,0,0)
+			return true
+		end
+	end
+end
+addEventHandler("onColShapeHit",root,function(hD,mD) greenzoneManager(source,"hit",hD,mD ) end)
+addEventHandler("onColShapeLeave",root,function(hD,mD) greenzoneManager(source,"leave",hD,mD) end)
+
+function onVehicleDamage()
+	if protected[source] and not (getVehicleType(source) == "Plane") then --We still want planes to receive damage!
+		cancelEvent()
+	end
+end
+addEventHandler("onVehicleDamage",root,onVehicleDamage)

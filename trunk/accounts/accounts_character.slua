@@ -1,7 +1,7 @@
 --[[
 	Project: SourceMode
 	Version: 1.1
-	Last Edited: 27/10/2014 (Jack)
+	Last Edited: 28/10/2014 (Jack)
 	Authors: Jack
 ]]--
 
@@ -14,9 +14,8 @@ addEvent("onPlayerChangeCharacter",true)
 addEvent("isCharacterNameAvailable",true)
 
 --Some vars we need
-local defPosition = "[ [ 0, 0, 2, 0 ] ]"
+local defPosition = "[ [ 2036.578125, 1543.389648, 10.8203125, 90 ] ]"
 local defWeapons = "[ [ ] ]"
-local defSkins = "[ [ ] ]"
 
 function onPlayerSelectCharacter(data)
 	if not client or not isElement(client) then return false end

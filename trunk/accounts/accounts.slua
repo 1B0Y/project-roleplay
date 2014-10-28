@@ -52,7 +52,7 @@ addEventHandler("onPlayerJoin",root,
 function()
 	switchCamera(source,"main")
 	showPlayerHudComponent(source,"all",false)
-	triggerClientEvent(client,"setPlayerGaming",client,true)
+	triggerClientEvent(source,"setPlayerGaming",source,true)
 end)
 
 --[[
