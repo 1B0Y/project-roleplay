@@ -1,0 +1,91 @@
+--[[
+	Project: SourceMode
+	Version: 1.0
+	Last Edited: 28/10/2014 (Jack)
+	Authors: Jack
+]]--
+
+--Our lovely vars we need
+local ships = {}
+local pirates = {} --Get it? :P
+local positions = {
+{x = 1994.8203125, y = 1517.083984375, width = 12, height = 60, movePosition = {x = 2016.7607421875,y = 1531.81640625,z = 11}}
+}
+
+--Custom events
+addEvent("onPlayerLoggedOut",true)
+
+function onStart()
+	for k,v in ipairs(positions) do
+		col = createColRectangle(v.x,v.y,v.width,v.height)
+		setElementData(col,"pirate",true) --Prevent greenzone conflict.
+		setElementData(col,"movePosition",v.movePosition)
+		table.insert(ships,col)
+	end
+	
+	--Clear the pirateship areas of vehicles and etc.
+	for k,v in ipairs(ships) do
+		local elements = getElementsWithinColShape(v)
+		if (#elements >= 1) then
+			for i,element in ipairs(elements) do
+				if (getElementType(element) == "vehicle") then
+					moveVehicle(element,v) --This works!
+				elseif (getElementType(element) == "player") then
+					pirates[element] = true
+				end
+			end
+		end
+	end
+end
+addEventHandler("onResourceStart",resourceRoot,onStart)
+
+function pirateColHandler(colshape,event,element,md)
+	if not colshape then return false end
+	if not element or not isElement(element) then return false end
+	if not md or not md == 0 then return false end
+	if not getElementData(source,"pirate") == true then return false end
+	
+	if event == "hit" then
+		if (getElementType(element) == "vehicle") then
+			moveVehicle(element,source)
+			return
+		elseif (getElementType(element) == "player") then
+			pirates[element] = true
+			return
+		end
+	elseif event == "leave" then
+		if (getElementType(element) == "player") then
+			if (pirates[element]) then
+				pirates[element] = nil
+			end
+		end
+	end
+end
+addEventHandler("onColShapeHit",root,function(hE,mD) pirateColHandler(source,"hit",hE,mD) end)
+addEventHandler("onColShapeLeave",root,function(hE,mD) pirateColHandler(source,"leave",hE,mD) end)
+
+function onPlayerLogout()
+	if not source or not isElement(source) then return false end
+	if pirates[source] then pirates[source] = nil end
+end
+addEventHandler("onPlayerLoggedOut",root,onPlayerLogout)
+
+function pay()
+	for player in pairs(pirates) do
+		if not player or not isElement(player) then pirates[player] = nil end
+		if not getElementDimension(player) == 0 then pirates[player] = nil end
+		givePlayerMoney(player,4)
+	end
+end
+setTimer(pay,1000,0)
+
+function moveVehicle(element,colshape)
+	if not element or not isElement(element) then return false end
+	if not colshape then return false end
+	
+	local position = getElementData(colshape,"movePosition")
+	if not position then error("No position set!") end
+	
+	setElementVelocity(element,0,0,0)
+	setElementPosition(element,position.x,position.y,position.z)
+end

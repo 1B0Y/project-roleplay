@@ -1,0 +1,5 @@
+<meta>
+	<info author="Jack" name="Pirateship" description="A pirate ship that gives you money! :O" version="1.0"/>
+	
+	<script src="pirate.slua" type="server"/>
+</meta>
