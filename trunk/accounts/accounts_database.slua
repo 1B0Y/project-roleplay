@@ -83,7 +83,11 @@ end
 function flushAccountData(username)
 	if not (accountData[username]) then return false end
 	
+	local connection = exports.database:getConnection()
+	if not connection then return false end
+	
 	for k,v in pairs(accountData[username]) do
-		dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(value),tostring(key),tostring(username))
+		dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(v),tostring(k),tostring(username))
 	end
+	return true
 end

@@ -22,6 +22,7 @@
 		<export function="setAccountData" type="server"/>
 		<export function="saveAccountData" type="server"/>
 		<export function="isAccountDataLoaded" type="server"/>
+		<export function="flushAccountData" type="server"/>
 		
 		<!-- Cache exports-->
 		<export function="loadCacheFile" type="client"/>
