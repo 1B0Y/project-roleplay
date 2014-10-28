@@ -9,7 +9,7 @@
 local ships = {}
 local pirates = {} --Get it? :P
 local positions = {
-{x = 1994.8203125, y = 1517.083984375, width = 12, height = 60, movePosition = {x = 2016.7607421875,y = 1531.81640625,z = 11}, heightLimit = 44}
+{x = 1994.8203125, y = 1516.583984375, width = 12, height = 60, movePosition = {x = 2016.7607421875,y = 1531.81640625,z = 11}, heightLimit = 44}
 }
 
 --Custom events
