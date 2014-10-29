@@ -21,6 +21,7 @@ addEventHandler("onResourceStart",resourceRoot,onStart)
 
 function onChat(message,_type)
 	cancelEvent() --Cancel it since we're doing our own.
+	if not (exports.accounts:isPlayerLoggedIn(source)) then return false end
 	local r,g,b = getPlayerNametagColor(source)
 	local name = getPlayerName(source)
 	
@@ -32,8 +33,9 @@ function onChat(message,_type)
 		local team = getPlayerTeam(source)
 		if not team then return false end
 		
+		local hex = exports.utils:rgbToHex(r,g,b)
 		for k,v in ipairs(getPlayersInTeam(team)) do
-			outputChatBox("(TEAM) "..name..": #FFFFFF"..message,v,r,g,b,true)
+			outputChatBox("(#FFFFFFTEAM"..hex..") "..name..": #FFFFFF"..message,v,r,g,b,true)
 		end
 	end
 	outputServerLog("[CHAT] "..name..": "..message)

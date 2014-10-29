@@ -44,3 +44,12 @@ function getPlayerWeapons(player)
 	
 	return weapons
 end
+
+function rgbToHex(r,g,b,a)
+	if not r or not g or not b then return false end
+	if (a) then
+		return string.format("#%.2X%.2X%.2X%.2X", r,g,b,a)
+	else
+		return string.format("#%.2X%.2X%.2X", r,g,b)
+	end
+end

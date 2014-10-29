@@ -4,6 +4,7 @@
 	<script src="utils.lua" type="shared"/>
 	
 	<export function="convertToBool" type="shared"/>
-	<export function="getGUICenter" type="shared"/>
+	<export function="getGUICenter" type="client"/>
 	<export function="getPlayerWeapons" type="shared"/>
+	<export function="rgbToHex" type="shared"/>
 </meta>
