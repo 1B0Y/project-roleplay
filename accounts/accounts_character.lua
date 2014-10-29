@@ -20,23 +20,32 @@ local skins = {
 [4] = {model = 271, name = "Ryder"}
 }
 
+--General
 local pedPosition = {1994.044921875, 1579.9517578125, 17.5625, 250}
 local _characters --local copy of the player's characters
 local selectedChar --Currently selected character
 local character --ped
 local ped -- temp ped
 local checkTimer
+
+--Character Creator
 local creating = false
 local rendering = false
 local model
 local name
 local r,g,b = 255,255,255
 
+--Character Deleting
+local deleting = false
+local charDelete
+
+--Custom events
 addEvent("sendPlayerCharacters",true)
 addEvent("returnCreateStatus",true)
 addEvent("characters:toggleGUI",true)
 addEvent("returnCharacterNameCheck",true)
 addEvent("onCharacterCreated",true)
+addEvent("onCharacterDeleted",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize()
@@ -85,6 +94,20 @@ function onStart()
 	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
 	buttons["left"] = guiCreateButton(X-(X/3),Y,width,height,"<",false)
 	buttons["right"] = guiCreateButton(X+(X/3),Y,width,height,">",false)
+	
+	
+	--[[
+		Delete confirmation
+		Version 1
+	]]
+	local width,height = 399, 128
+	local X,Y = exports.utils:getGUICenter(rX,rY,width,height)
+	windows["confDelete"] = guiCreateWindow(X,Y,width,height, "SourceMode - Delete Character?", false)
+	guiCreateStaticImage(9, 22, 69, 54, "images/warning.png", false, windows["confDelete"])
+	labels["confirm"] = guiCreateLabel(81, 32, 306, 32, "Are you sure you want to delete your character?\nDeleting your character will delete it permanently!", false, windows["confDelete"])
+	buttons["yes"] = guiCreateButton(34, 85, 126, 25, "Yes", false, windows["confDelete"])
+	buttons["no"] = guiCreateButton(234, 85, 126, 25, "No", false, windows["confDelete"])
+	
 	--Apply fonts and layouts to labels
 	for k,v in pairs(labels) do
 		guiSetFont(v,"default-bold-small")
@@ -100,14 +123,17 @@ function onStart()
 	guiWindowSetMovable(windows["creator"],false)
 	guiWindowSetSizable(windows["creator"],false)
 	guiSetAlpha(windows["creator"],1)
+	guiSetAlpha(windows["confDelete"],1)
 	guiSetFont(buttons["left"],"sa-header")
 	guiSetFont(buttons["right"],"sa-header")
 	
-	--button eventhandlers
+	--Character Selection
 	addEventHandler("onClientGUIClick",buttons["logout"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",buttons["play"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",buttons["create"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",gridlists["characters"],onCharacterClick,false)
+	
+	--Character Creator
 	addEventHandler("onClientGUIClick",buttons["back"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",buttons["left"],onCharacterClick,false)
 	addEventHandler("onClientGUIClick",buttons["right"],onCharacterClick,false)
@@ -116,14 +142,20 @@ function onStart()
 	addEventHandler("onClientGUIClick",scrollbars["green"],onClientChange,false)
 	addEventHandler("onClientGUIClick",scrollbars["blue"],onClientChange,false)
 	
+	--Character Delete
+	addEventHandler("onClientGUIClick",buttons["yes"],onCharacterClick,false)
+	addEventHandler("onClientGUIClick",buttons["no"],onCharacterClick,false)
+	addEventHandler("onClientGUIClick",buttons["delete"],onCharacterClick,false)
+	
 	guiSetVisible(windows["characters"],false)
 	guiSetVisible(windows["creator"],false)
+	guiSetVisible(windows["confDelete"],false)
 	guiSetVisible(buttons["play"],false)
 	guiSetVisible(buttons["left"],false)
 	guiSetVisible(buttons["right"],false)
 	guiSetEnabled(buttons["play"],false)
 	--guiSetEnabled(buttons["create"],false)
-	guiSetEnabled(buttons["delete"],false)
+	--guiSetEnabled(buttons["delete"],false)
 end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)
 
@@ -154,6 +186,38 @@ function onCharacterClick(button,state)
 			manageCharacterCreator("create")
 		elseif (source == buttons["back"]) then
 			toggleCreator(false)
+			characterGUIManager("characters",nil,true)
+			characterGUIManager("play",nil,true)
+		--Character deleting
+		elseif (source == buttons["delete"]) then
+			--Make sure we've got one of the characters selected
+			local row,column = guiGridListGetSelectedItem(gridlists["characters"])
+			local charName = guiGridListGetItemText(gridlists["characters"],row,1)
+			if charName then
+				for k,v in ipairs(_characters) do
+					if (v.charName == charName) then
+						charDelete = v
+						break
+					end
+				end
+				
+				if (charDelete) then
+					deleting = true
+					characterGUIManager("confDelete",nil,true)
+					characterGUIManager("characters",nil,false)
+					characterGUIManager("play",nil,false)
+					
+					guiSetText(labels["confirm"],"Are you sure you want to delete "..charDelete.charName.."?\nDeleting your character will delete it permanently!")
+				end
+			end
+		elseif (source == buttons["yes"]) then
+			if (deleting) then
+				deleteCharacter(charDelete)
+			end
+		elseif (source == buttons["no"]) then
+			delete = false
+			charDelete = nil
+			characterGUIManager("confDelete",nil,false)
 			characterGUIManager("characters",nil,true)
 			characterGUIManager("play",nil,true)
 		else
@@ -365,6 +429,20 @@ function onCharacterCreated(characters)
 	characterGUIManager("play",nil,true)
 end
 addEventHandler("onCharacterCreated",root,onCharacterCreated)
+
+function deleteCharacter(data,characters)
+	if characters == nil then
+		local character = data.charName
+		triggerServerEvent("onPlayerDeleteCharacter",localPlayer,character)
+		return
+	end
+	
+	loadCharacterData(characters)
+	characterGUIManager("confDelete",nil,false)
+	characterGUIManager("characters",nil,true)
+	characterGUIManager("play",nil,true)
+end
+addEventHandler("onCharacterDeleted",root,deleteCharacter)
 
 function characterGUIManager(window,fade,state)
 	if window == "all" then

@@ -88,9 +88,21 @@ function onAttemptCreateCharacter(name,skin,colors)
 		local characters = loadCharacterData(client) --Load the new data
 		triggerClientEvent(client,"onCharacterCreated",client,characters)
 	end
-	return false --Unknown error.
+	return false --System error.
 end
 addEventHandler("onPlayerCreateNewCharacter",root,onAttemptCreateCharacter)
+
+function onAttemptDeleteCharacter(name)
+	if not client or not isElement(client) then return false end
+	if not name then return false end
+	if (deleteCharacter(client,name)) then
+		local characters = loadCharacterData(client)
+		triggerClientEvent(client,"onCharacterDeleted",client,nil,characters)
+		return true
+	end
+	return false --System error.
+end
+addEventHandler("onPlayerDeleteCharacter",root,onAttemptDeleteCharacter)
 	
 
 --[[
@@ -219,12 +231,13 @@ function deleteCharacter(player,name)
 	if not name or #name < 3 then return false end
 	
 	local account = getPlayerAccount(player)
-	local characters = fromJSON(getAccountData(account,"characters") or defSkin)
-	if not (#characters >= 1) then return false end --We have no characters to delete.
+	local characters = fromJSON(getAccountData(account,"characters")) or "[ [ ] ]"
+	if (#characters < 1) then return false end --We have no characters to delete.
 	
-	for k,v in ipairs(characters) do
+	for k,v in pairs(characters) do
 		if (v.charName == name) then
-			table.remove(characters,k)
+			characters[k] = nil
+			setAccountData(account,"characters",toJSON(characters))
 			return true
 		end
 	end
