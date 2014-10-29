@@ -33,12 +33,12 @@
 		<export function="getPlayerAccount" type="server"/>
 		<export function="isPlayerLoggedIn" type="server"/>
 		
-		<!-- Test exports -->
-		<export function="isCharacterNameAvailable" type="server"/>
 	
 	<!-- File stuff -->
 	<file src="images/mtalogo.png"/>
 	<file src="images/nope.jpg"/>
+	<file stc="images/warning.png"/>
+	<file stc="images/error.png"/>
 	<file src="sound/nope.mp3"/>
 	
 	<!-- Min MTA ver (because it nagged me for it...) -->
