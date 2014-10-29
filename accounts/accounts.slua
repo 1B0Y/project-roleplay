@@ -251,6 +251,7 @@ function checkUsername(username)
 			available = true
 		end
 		triggerClientEvent(client,"returnUsernameAvailability",client,username,available)
+		return available
 	else
 		return false
 	end
