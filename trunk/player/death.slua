@@ -1,0 +1,128 @@
+--[[
+	Project: SourceMode
+	Version: 1.0
+	Last Edited: 29/10/2014 (Jack)
+	Authors: Jack
+]]--
+
+local hospitals = {
+	--Los Santos
+	{1165,-1351,15,90,"All Saints"},
+	{2032,-1416,17,132,"Jefferson"},
+	{1242,329,20,332,"Montgomery"},
+	{2270,-75,27,181,"Palimino Creek"},
+	
+	--San Fierro
+	{-2201,-2308,31,360,"Whetstone"},
+	{-2655,636,14,180,"Santa Flora"},
+	
+	--Las Venturas
+	{1607,1818,11,360,"Las Venturas"},
+	{-1515,2525,56,0,"El Quebrados"},
+	{-254,2603,63,270,"Las Payasadas"},
+	{-320,1049,20,360,"Fort Carson"}
+}
+
+local _spawnPlayer = spawnPlayer
+local respawnTimers = {}
+local droppedMoney = {}
+
+function onStart()
+	for k,v in ipairs(getElementsByType("player")) do
+		if (isPedDead(v)) then
+			triggerEvent("onPlayerWasted",v)
+		end
+	end
+end
+addEventHandler("onResourceStart",resourceRoot,onStart)
+
+function onPlayerDeath(ammo,killer,weapon,bodypart)
+	if not (exports.accounts:isPlayerLoggedIn(source)) then return false end --If he's not logged in, ignore.
+	if killer and isElement(killer) and killer ~= source then --Make sure the source isn't the killer
+		dropMoney(source) --Drop all his money in his pocket.
+	end
+	
+	local x,y,z,rot,name = findNearbyHospital(source)
+	
+	--Make sure we kill any timers that the player has (just incase)
+	for k,v in pairs(respawnTimers) do
+		if v and isTimer(v) then 
+			killTimer(v) 
+			respawnTimers[k] = nil
+		end
+	end
+	
+	respawnTimers["fadeOut"] = setTimer(fadeCamera,1000,1,source,false,2.0,255,255,255)
+	respawnTimers["respawn"] = setTimer(spawnPlayer,3000,1,source,x,y,z,rot)
+	respawnTimers["message"] = setTimer(outputChatBox,3250,1,"You have been transported to "..name.." Hospital.",source,255,255,0)
+	respawnTimers["fadeIn"] = setTimer(fadeCamera,3250,1,source,true,1.0)
+end
+addEventHandler("onPlayerWasted",root,onPlayerDeath)
+
+function spawnPlayer(player,x,y,z,rot)
+	if not player or not isElement(player) then return false end
+	_spawnPlayer(player,x,y,z,rot,getElementModel(player),0,0,getPlayerTeam(player))
+end
+
+function findNearbyHospital(player)
+	if not player or not isElement(player) then return false end
+	
+	local hospital --Nearest hospital
+	local min = 999999 --Pre-define the min distance. This'll be overwrote later on.
+	for k,v in pairs(hospitals) do
+		local x,y,z = getElementPosition(player)
+		local hX,hY,hZ,hR,hN = v[1],v[2],v[3],v[4],v[5]
+		local distance = getDistanceBetweenPoints2D(x,y,hX,hY)
+		if distance < min then
+			hospital = v
+			min = distance
+		end
+	end
+	
+	return hospital[1],hospital[2],hospital[3],hospital[4],hospital[5]
+end
+
+local object_TRASH_BAG = 1265
+local object_MONEY = 1212
+function dropMoney(player)
+	if player and isElement(player) then
+		local money = getPlayerMoney(player)
+		local x,y,z = getElementPosition(player)
+		if money <= 0 then
+			outputChatBox(getPlayerName(player).." is poor!",root,255,0,0)
+			return
+		end
+		
+		--Let's start off with the big money
+		local moneyType
+		local total
+		if (money >= 10000) then
+			moneyType = tonumber(object_TRASH_BAG)
+			total = math.random(3)
+		elseif (money < 10000) then
+			moneyType = tonumber(object_MONEY)
+			total = math.random(7)
+		end
+		
+		for i=1,total do
+			local moneyPickup = createPickup(x+math.random(-3,3),y+math.random(-3,3),z,3,moneyType)
+			setElementData(moneyPickup,"money",math.floor(money/total))
+			addEventHandler("onPickupUse",moneyPickup,onMoneyPickedUp)
+			droppedMoney[moneyPickup] = setTimer(destroyElement,60000*5,1,moneyPickup) --If it's not picked up in 5 minutes, destroy it.
+		end
+		setPlayerMoney(player,0)
+	end
+end
+
+function onMoneyPickedUp(player)
+	if not player or not isElement(player) or not getElementType(player) == "player" then return false end
+	if isPedDead(player) then return false end
+	
+	local money = getElementData(source,"money")
+	if money then
+		givePlayerMoney(player,money)
+	end
+	
+	if droppedMoney[source] and isTimer(droppedMoney[source]) then killTimer(droppedMoney[source]) end
+	destroyElement(source)
+end

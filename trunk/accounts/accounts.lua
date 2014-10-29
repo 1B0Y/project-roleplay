@@ -310,7 +310,7 @@ addEventHandler("returnUpdateStatus",root,returnUpdateStatus)
 
 --usernameAvailable: Returns if the username is available to use or not.
 function usernameAvailable(username,available)
-	if (available) then
+	if (available == true) then
 		guiSetText(labels["status-username"],username.." is available!")
 		guiLabelSetColor(labels["status-username"],0,255,0)
 	else

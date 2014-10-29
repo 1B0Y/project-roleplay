@@ -1,3 +1,10 @@
+--[[
+	Project: SourceMode
+	Version: 1.0
+	Last Edited: 29/10/2014 (Jack)
+	Authors: Jack
+]]--
+
 function onStart() --This is triggered when the resource has been executed
 	
 	--Check if we have a supportive res

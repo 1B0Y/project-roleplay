@@ -178,7 +178,7 @@ function despawnCharacter(player)
 	setElementFrozen(player,true)
 	setPlayerMoney(player,0) --Set it to this just incase.
 	triggerEvent("onPlayerDespawned",player)
-	triggerClientEvent("callDespawnTrigger",player)
+	setTimer(triggerClientEvent,250,1,"callDespawnTrigger",player)
 end
 
 --saveCharacterData
