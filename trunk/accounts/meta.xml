@@ -32,6 +32,9 @@
 		<!-- Accounts exports-->
 		<export function="getPlayerAccount" type="server"/>
 		<export function="isPlayerLoggedIn" type="server"/>
+		
+		<!-- Test exports -->
+		<export function="isCharacterNameAvailable" type="server"/>
 	
 	<!-- File stuff -->
 	<file src="images/mtalogo.png"/>

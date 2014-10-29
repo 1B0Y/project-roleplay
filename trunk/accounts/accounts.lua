@@ -137,8 +137,6 @@ function onStart()
 	guiSetVisible(windows["NOPE"],false)
 	guiSetVisible(windows["register"],false)
 	guiSetVisible(windows["recovery"],false)
-	showCursor(true)
-	guiSetInputMode("no_binds") --Disable chat and etc..
 end
 addEventHandler("onClientResourceStart",resourceRoot,onStart)
 

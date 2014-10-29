@@ -38,6 +38,7 @@ function onStart()
 	for k,v in ipairs(getElementsByType("player")) do
 		setTimer(switchCamera,250,1,v,"main")
 		showPlayerHudComponent(v,"all",false)
+		setTimer(triggerClientEvent,250,1,v,"setPlayerGaming",v,false)
 	end
 	
 	--Cache all usernames
@@ -52,7 +53,7 @@ addEventHandler("onPlayerJoin",root,
 function()
 	switchCamera(source,"main")
 	showPlayerHudComponent(source,"all",false)
-	triggerClientEvent(source,"setPlayerGaming",source,true)
+	triggerClientEvent(source,"setPlayerGaming",source,false)
 end)
 
 --[[

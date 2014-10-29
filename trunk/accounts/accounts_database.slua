@@ -13,7 +13,7 @@ function loadAccountData(player,username)
 	if player and isElement(player) and username then
 		local connection = exports.database:getConnection() or error("No database connection!")
 		
-		dbQuery(cacheAccountData,{player,username},connection,"SELECT * FROM accountdata WHERE username=? ORDER BY id ASC",username)
+		dbQuery(cacheAccountData,{player,username},connection,"SELECT * FROM accountdata WHERE username=?",username)
 	end
 end
 
@@ -27,7 +27,7 @@ function cacheAccountData(query,player,username)
 	local results = dbPoll(query,-1)
 	if (results) then
 		if (#results >= 1) then
-			for k,v in ipairs(results) do
+			for k,v in pairs(results) do
 				local value = v.value
 				if v.value == "NULL" then
 					v.value = nil
@@ -76,7 +76,6 @@ function setAccountData(username,key,value)
 	
 	accountData[username][key] = value
 	--dbExec(connection,"UPDATE accountdata SET value=? WHERE name=? AND username=?",tostring(value),tostring(key),tostring(username)) --NOT GOOD!
-	outputDebugString("Key: "..key..", Value: "..value)
 	return true
 end
 
