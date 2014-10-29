@@ -46,6 +46,8 @@ addEvent("characters:toggleGUI",true)
 addEvent("returnCharacterNameCheck",true)
 addEvent("onCharacterCreated",true)
 addEvent("onCharacterDeleted",true)
+addEvent("callSpawnTrigger",true)
+addEvent("callDespawnTrigger",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize()
@@ -397,11 +399,8 @@ function manageCharacterCreator(_function)
 		end
 		setElementModel(ped,skins[model].model)
 	elseif _function == "create" then
-		outputDebugString("Create")
 		if not model then return false end
-		outputDebugString("We have a model!")
 		if not name or #name < 1 then return false end
-		outputDebugString("We have a name!")
 		
 		--Pre-define the tag colors and other things we need
 		if not (r) then r = math.random(255) end
@@ -411,8 +410,8 @@ function manageCharacterCreator(_function)
 		if (skins[model]) then 
 			skin = skins[model].model
 		end
+		
 		--attempt to create the new character
-		outputDebugString("Calling serverside...")
 		triggerServerEvent("onPlayerCreateNewCharacter",localPlayer,name,skin,{math.floor(r),math.floor(g),math.floor(b)})
 	end
 end
@@ -463,3 +462,13 @@ function characterGUIManager(window,fade,state)
 	end
 end
 addEventHandler("characters:toggleGUI",root,characterGUIManager)
+
+function onPlayerSpawned()
+	triggerEvent("onClientPlayerSpawned",localPlayer)
+end
+addEventHandler("callSpawnTrigger",root,onPlayerSpawned)
+
+function onPlayerDespawned()
+	triggerEvent("onClientPlayerDespawned",localPlayer)
+end
+addEventHandler("callDespawnTrigger",root,onPlayerSpawned)

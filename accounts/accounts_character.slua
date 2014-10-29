@@ -162,6 +162,8 @@ function spawnCharacter(player,data)
 			setPedArmor(player,armor)
 		end, 1000, 1
 	)
+	triggerEvent("onPlayerSpawned",player)
+	triggerClientEvent("callSpawnTrigger",player)
 	
 	return true
 end
@@ -175,6 +177,8 @@ function despawnCharacter(player)
 	setElementPosition(player,0,0,-5)
 	setElementFrozen(player,true)
 	setPlayerMoney(player,0) --Set it to this just incase.
+	triggerEvent("onPlayerDespawned",player)
+	triggerClientEvent("callDespawnTrigger",player)
 end
 
 --saveCharacterData
