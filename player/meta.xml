@@ -1,0 +1,5 @@
+<meta>
+	<info author="Jack" name="Player" description="Player Manager - UCP, Death manager, Res warning, etc..." version="1.0"/>
+	
+	<script src="ucp.lua" type="client"/>
+</meta>
