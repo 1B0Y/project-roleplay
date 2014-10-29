@@ -1,0 +1,5 @@
+<meta>
+	<info author="Jack" name="Core" description="Core of SourceMode - Used for setting up teams and etc.." version="1.0"/>
+	
+	<script src="core.slua" type="server"/>
+</meta>

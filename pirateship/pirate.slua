@@ -79,9 +79,12 @@ addEventHandler("onPlayerLoggedOut",root,onPlayerLogout)
 
 function pay()
 	for player in pairs(pirates) do
-		if not player or not isElement(player) then pirates[player] = nil end
-		if not getElementDimension(player) == 0 then pirates[player] = nil end
-		givePlayerMoney(player,4)
+		if player and isElement(player) then
+			if not getElementDimension(player) == 0 then pirates[player] = nil end
+			givePlayerMoney(player,4)
+		else
+			pirates[player] = nil
+		end
 	end
 end
 setTimer(pay,1000,0)
