@@ -163,7 +163,7 @@ function spawnCharacter(player,data)
 			setPedArmor(player,armor)
 			
 			for k,v in pairs(weapons) do
-				if (k == blockedWeapons[k]) then
+				if (k ~= blockedWeapons[k]) then
 					giveWeapon(player,k,v)
 				end
 			end
