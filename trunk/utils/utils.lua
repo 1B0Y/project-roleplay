@@ -29,5 +29,18 @@ function getGUICenter(rX,rY,width,height)
 end
 
 function getPlayerWeapons(player)
-	return {}
+	if not player or not isElement(player) or not getElementType(player) == "player" then return false end
+
+	local weapons = {}
+	for slot = 0,12 do
+		weapon = getPedWeapon(player,slot)
+		if weapon > 0 then
+			ammo = getPedTotalAmmo(player,slot)
+			if ammo > 0 then
+				weapons[weapon] = ammo
+			end
+		end
+	end
+	
+	return weapons
 end

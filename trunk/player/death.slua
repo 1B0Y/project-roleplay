@@ -43,6 +43,7 @@ function onPlayerDeath(ammo,killer,weapon,bodypart)
 	end
 	
 	local x,y,z,rot,name = findNearbyHospital(source)
+	local weapons = exports.utils:getPlayerWeapons(source)
 	
 	--Make sure we kill any timers that the player has (just incase)
 	for k,v in pairs(respawnTimers) do
@@ -53,15 +54,19 @@ function onPlayerDeath(ammo,killer,weapon,bodypart)
 	end
 	
 	respawnTimers["fadeOut"] = setTimer(fadeCamera,1000,1,source,false,2.0,255,255,255)
-	respawnTimers["respawn"] = setTimer(spawnPlayer,3000,1,source,x,y,z,rot)
+	respawnTimers["respawn"] = setTimer(spawnPlayer,3000,1,source,x,y,z,rot,weapons)
 	respawnTimers["message"] = setTimer(outputChatBox,3250,1,"You have been transported to "..name.." Hospital.",source,255,255,0)
 	respawnTimers["fadeIn"] = setTimer(fadeCamera,3250,1,source,true,1.0)
 end
 addEventHandler("onPlayerWasted",root,onPlayerDeath)
 
-function spawnPlayer(player,x,y,z,rot)
+function spawnPlayer(player,x,y,z,rot,weapons)
 	if not player or not isElement(player) then return false end
 	_spawnPlayer(player,x,y,z,rot,getElementModel(player),0,0,getPlayerTeam(player))
+	
+	for k,v in pairs(weapons) do
+		giveWeapon(player,k,v)
+	end
 end
 
 function findNearbyHospital(player)

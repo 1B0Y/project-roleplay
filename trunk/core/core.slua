@@ -1,0 +1,46 @@
+--[[
+	Project: SourceMode
+	Version: 1.0
+	Last Edited: 29/10/2014 (Jack)
+	Authors: Jack
+]]--
+
+function onStart()
+	--Create some teams
+	players = createTeam("Players",0,255,0)
+	staff = createTeam("Staff",255,0,0)
+	
+	--Move current players into the Players team
+	for k,v in ipairs(getElementsByType("player")) do
+		if (exports.accounts:isPlayerLoggedIn(v)) then
+			setPlayerTeam(v,players)
+		end
+	end
+end
+addEventHandler("onResourceStart",resourceRoot,onStart)
+
+function onChat(message,_type)
+	cancelEvent() --Cancel it since we're doing our own.
+	local r,g,b = getPlayerNametagColor(source)
+	local name = getPlayerName(source)
+	
+	if _type == 0 then
+		outputChatBox(name..": #FFFFFF"..message,root,r,g,b,true)
+	elseif _type == 1 then
+		outputChatBox(name.." "..message,root,r,g,b,true)
+	elseif _type == 2 then
+		local team = getPlayerTeam(source)
+		if not team then return false end
+		
+		for k,v in ipairs(getPlayersInTeam(team)) do
+			outputChatBox("(TEAM) "..name..": #FFFFFF"..message,v,r,g,b,true)
+		end
+	end
+	outputServerLog("[CHAT] "..name..": "..message)
+end
+addEventHandler("onPlayerChat",root,onChat)
+
+--[[
+	Use this resource as freely as you want. I'm mainly using this to configure some aspects of the gamemode
+	such as teams and etc.
+]]
