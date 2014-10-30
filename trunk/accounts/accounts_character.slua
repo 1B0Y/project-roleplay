@@ -35,8 +35,10 @@ addEventHandler("onPlayerSelectCharacter",root,onPlayerSelectCharacter)
 function onPlayerChangeCharacter()
 	if not client or not isElement(client) then return false end
 	despawnCharacter(client)
-	triggerClientEvent(client,"characters:toggleGUI",client,"all",true,true)
+	triggerClientEvent(client,"characters:toggleGUI",client,"characters",true,true)
+	triggerClientEvent(client,"characters:toggleGUI",client,"play",true,true)
 	triggerClientEvent(client,"setPlayerGaming",client,false)
+	switchCamera(client,"character")
 	flushAccountData(getPlayerAccount(source)) --Force-save the account data
 end
 addEventHandler("onPlayerChangeCharacter",root,onPlayerChangeCharacter)
@@ -186,6 +188,7 @@ function despawnCharacter(player)
 	setPlayerMoney(player,0) --Set it to this just incase.
 	triggerEvent("onPlayerDespawned",player)
 	setTimer(triggerClientEvent,250,1,player,"callDespawnTrigger",player)
+	removeElementData(player,"character")
 end
 
 --saveCharacterData

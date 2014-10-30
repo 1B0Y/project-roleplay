@@ -31,7 +31,12 @@
 		
 		<!-- Accounts exports-->
 		<export function="getPlayerAccount" type="server"/>
-		<export function="isPlayerLoggedIn" type="server"/>
+		<export function="isPlayerLoggedIn" type="shared"/>
+		<export function="onPlayerLogout" type="client"/>
+		
+		<!-- Character exports-->
+		<export function="onCharacterChanged" type="client"/>
+		<export function="isPlayerSpawned" type="server"/>
 		
 	
 	<!-- File stuff -->

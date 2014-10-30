@@ -463,6 +463,10 @@ function characterGUIManager(window,fade,state)
 end
 addEventHandler("characters:toggleGUI",root,characterGUIManager)
 
+function onCharacterChanged()
+	triggerServerEvent("onPlayerChangeCharacter",localPlayer)
+end
+
 function onPlayerSpawned()
 	triggerEvent("onClientPlayerSpawned",localPlayer)
 end
