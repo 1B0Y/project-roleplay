@@ -18,3 +18,9 @@ function isPlayerLoggedIn(player)
 	
 	if getElementData(player,"username") then return true else return false end
 end
+
+function isPlayerSpawned(player)
+	if not player or not isElement(player) or not (getElementType(player) == "player") then return false end
+	
+	if getElementData(player,"character") then return true else return false end
+end
