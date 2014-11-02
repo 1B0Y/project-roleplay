@@ -1,0 +1,28 @@
+--[[
+	Project: SourceMode
+	Version: 1.0
+	Last Edited: 29/10/2014 (Jack)
+	Authors: Jack
+]]--
+
+addEvent("onPlayerLoggedIn",true)
+
+function onStart()
+	for k,v in ipairs(getElementsByType("player")) do
+		if (exports.accounts:isPlayerLoggedIn(v) and exports.accounts:isPlayerSpawned(v)) then
+			setTimer(triggerClientEvent,250,1,v,"onUCPStart",v,true)
+		end
+	end
+end
+addEventHandler("onResourceStart",resourceRoot,onStart)
+
+function onPlayerLogin()
+	if not client or not isElement(client) then return false end
+	
+	local account = getPlayerAccount(client)
+	local lastLogin = getAccountData(client,"lastLogin")
+	local playtime = getAccountData(client,"playtime")
+	
+	triggerClientEvent(client,"updateAccounts",client,account,lastLogin,playtime)
+end
+addEventHandler("onPlayerLoggedIn",root,onPlayerLogin)
