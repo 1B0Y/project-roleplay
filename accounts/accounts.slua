@@ -129,6 +129,7 @@ function logIn(username,password,remember,encrypted)
 			setElementData(client,"username",username)
 			setElementData(client,"ID",results[1].id)
 			dbExec(connection,"UPDATE accounts SET serial=? WHERE username=?",getPlayerSerial(client),username)
+			setAccountData(getPlayerAccount(client),"lastLogin",exports.utils:getDateAndTime())
 			triggerClientEvent(client,"returnUpdateStatus",client,"login","Handshaking...")
 			triggerClientEvent(client,"updatePlayerCache",client,username,password,remember)
 			if (isAccountDataLoaded(username)) then
@@ -137,6 +138,7 @@ function logIn(username,password,remember,encrypted)
 				loadAccountData(client,username)
 			end
 			triggerEvent("onPlayerLoggedIn",client)
+			triggerClientEvent("triggerClientPlayerLoggedIn",client)
 		else
 			triggerClientEvent(client,"returnUpdateStatus",client,"login","Incorrect password! Please try again.")
 			return
@@ -145,22 +147,56 @@ function logIn(username,password,remember,encrypted)
 end
 addEventHandler("onPlayerAttemptLogin",root,logIn)
 
-function logOut()
-	if (isPlayerLoggedIn(client)) then
-		triggerClientEvent(client,"characters:toggleGUI",client,"all",true,false)
-		triggerClientEvent(client,"accounts:toggleGUI",client,"login",true,true)
-		triggerClientEvent(client,"setPlayerGaming",client,false)
-		triggerEvent("onPlayerLoggedOut",client)
-		switchCamera(client,"main")
-		showPlayerHudComponent(client,"all",false)
-		removeElementData(client,"username")
-		removeElementData(client,"ID")
+function logOut(player)
+	if client and isElement(client) then
+		player = client
+	end
+	
+	if not player or not isElement(player) or not getElementType(player) == "player" then return false end
+	if (isPlayerLoggedIn(player)) then
+		triggerClientEvent(player,"characters:toggleGUI",player,"all",true,false)
+		triggerClientEvent(player,"accounts:toggleGUI",player,"login",true,true)
+		triggerClientEvent(player,"setPlayerGaming",player,false)
+		triggerEvent("onPlayerLoggedOut",player)
+		switchCamera(player,"main")
+		showPlayerHudComponent(player,"all",false)
+		removeElementData(player,"username")
+		removeElementData(player,"ID")
+		triggerClientEvent("triggerClientPlayerLoggedOut",player)
 		return true
 	else
 		return false
 	end
 end
 addEventHandler("onPlayerAttemptLogout",root,logOut)
+
+function setAccountPassword(player,oldPass,newPass)
+	if not player or not isElement(player) then return false end
+	if not isPlayerLoggedIn(player) then return false end --He MUST be logged in!
+	
+	if oldPass and newPass then
+		local connections = exports.database:getConnection() --get a DB connection
+		local account = getPlayerAccount(player) --Get his account
+		
+		--SHA hash the passwords
+		local oldPass = sha256(oldPass)
+		local newPass = sha256(newPass)
+		
+		--First, we need to check if the oldPass is right.
+		local query = dbQuery(connection,"SELECT * FROM accounts WHERE username=? LIMIT 1",username)
+		local results = dbPoll(query,-1) --If your server experiences major lag (and i mean, MAJOR LAG), tell me.
+		if (results) and (#results >= 1) then
+			if (results[1].password == oldPass) then
+				dbExec(connection,"UPDATE accounts SET password=? WHERE username=? AND password=?",newPass,account,oldPass)
+				return true
+			else
+				return false
+			end
+		end
+		return false
+	end
+	return false
+end
 
 --[[
 	onAccountDataLoaded

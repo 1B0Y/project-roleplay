@@ -6,6 +6,7 @@
 ]]--
 
 local reset --Info status timer.
+local loggedin = false
 
 --GUI stuff
 local windows = {}
@@ -22,6 +23,8 @@ addEvent("returnUsernameAvailability",true)
 addEvent("onAccountRegistered",true)
 addEvent("accounts:toggleGUI",true)
 addEvent("setPlayerGaming",true)
+addEvent("triggerClientPlayerLoggedIn",true)
+addEvent("triggerClientPlayerLoggedOut",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize() --Get the player's screen resolution (so we can make sure GUI fits in all resolutions)
@@ -358,6 +361,10 @@ function accountGUIManager(window,fade,state)
 end
 addEventHandler("accounts:toggleGUI",root,accountGUIManager)
 
+function isPlayerLoggedIn()
+	return loggedin
+end
+
 --Disable cursor and input modes
 function setPlayerGaming(state)
 	showCursor(not state)
@@ -365,7 +372,17 @@ function setPlayerGaming(state)
 end
 addEventHandler("setPlayerGaming",root,setPlayerGaming)
 
-function logout()
+function onPlayerLogout()
 	triggerServerEvent("onPlayerAttemptLogout",localPlayer)
 end
-addCommandHandler("tLogout",logout)
+
+function onPlayerLoginChange(state)
+	loggedin = state
+	if state == true then
+		triggerEvent("onClientPlayerLoggedIn",localPlayer)
+	else
+		triggerEvent("onClientPlayerLoggedOut",localPlayer)
+	end
+end
+addEventHandler("triggerClientPlayerLoggedIn",root,function() onPlayerLoginChange(true) end)
+addEventHandler("triggerClientPlayerLoggedOut",root,function() onPlayerLoginChange(false) end)
