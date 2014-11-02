@@ -6,6 +6,8 @@
 ]]--
 
 addEvent("onPlayerLoggedIn",true)
+addEvent("logoutPlayer",true)
+addEvent("changeCharacter",true)
 
 function onStart()
 	for k,v in ipairs(getElementsByType("player")) do
@@ -26,3 +28,13 @@ function onPlayerLogin()
 	triggerClientEvent(client,"updateAccounts",client,account,lastLogin,playtime)
 end
 addEventHandler("onPlayerLoggedIn",root,onPlayerLogin)
+
+function logoutPlayer()
+	triggerEvent("onPlayerAttemptLogout",client)
+end
+addEventHandler("logoutPlayer",root,logoutPlayer)
+
+function changeCharacter()
+	triggerEvent("onPlayerChangeCharacter",client)
+end
+addEventHandler("changeCharacter",root,changeCharacter)
