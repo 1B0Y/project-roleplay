@@ -1,9 +1,11 @@
 <meta>
 	<info author="Jack" name="Player" description="Player Manager - UCP, Death manager, Res warning, etc..." version="1.0"/>
 	
-	<script src="res.lua" type="client"/>
+	<script src="hud.lua" type="client"/>
 	<script src="ucp.lua" type="client"/>
 	<script src="blips.lua" type="client"/>
 	<script src="death.slua" type="server"/>
 	<script src="ucp.slua" type="server"/>
+	
+	<file src="images/sourcemode.png"/>
 </meta>
