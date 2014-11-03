@@ -42,8 +42,9 @@
 	<!-- File stuff -->
 	<file src="images/mtalogo.png"/>
 	<file src="images/nope.jpg"/>
-	<file stc="images/warning.png"/>
-	<file stc="images/error.png"/>
+	<file src="images/warning.png"/>
+	<file src="images/error.png"/>
+	<file src="images/sourcemode.png"/>
 	<file src="sound/nope.mp3"/>
 	
 	<!-- Min MTA ver (because it nagged me for it...) -->

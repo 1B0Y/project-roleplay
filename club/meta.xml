@@ -2,5 +2,5 @@
     <info author="DLmass" name="club" description="Club interior near pirateship" version="1.0"/>
     
     <script src="interior.lua" type="server" />
-    <map src="map.map" dimension="0"></map>
+    <map src="club.map" dimension="0"/>
 </meta>
