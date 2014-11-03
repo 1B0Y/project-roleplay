@@ -5,10 +5,15 @@
 	Authors: Jack
 ]]--
 
+local version = "1.0 ALPHA"
+
 function onStart()
 	--Create some teams
 	players = createTeam("Players",0,255,0)
 	staff = createTeam("Staff",255,0,0)
+	
+	--Set our gamemode name
+	setGameType("SourceMode V"..version)
 	
 	--Move current players into the Players team
 	for k,v in ipairs(getElementsByType("player")) do
