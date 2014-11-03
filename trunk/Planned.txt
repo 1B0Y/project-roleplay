@@ -1,0 +1,25 @@
+[Ver 1.0 - Release: 00/00/0000 - Signed: Jack]
+ - Add Ammu-nation
+ - Add Pay 'n' Spray
+ - Add Modshop
+ - Add Cars / Bikes / Boat stores
+ - Add the UCP Panel
+ - Add Side-Missions
+ - Add Interiors.
+
+[Ver 1.1 - Release: 00/00/0000 - Signed: N/A]
+ - Add General Stats
+ - Add Global Accounts ALPHA (More info below).
+
+
+ -= Global Accounts =-
+What is global accounts?
+Global accounts is a "hive" that the SourceMode founders run on their server. This allows players to switch between servers and doesn't have to register again.
+
+How does it work?
+We'll configure our database to allow servers to select the required account data in order for the player to login. The account "data" however will not be available (because players can cheat on other servers), but the characters might be available.
+
+What about the "banned" feature?
+Global bans will be a seperate feature. Players can only be globally banned if they cheat / exploit anything within the gamemode and have been reported to the founders of SourceMode with valid evidence. The server owners have complete control over this by setting "globalBanning" to "false" in the accounts settings file.
+
+More information about Global Accounts will be available soon.
