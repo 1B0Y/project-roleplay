@@ -7,4 +7,7 @@
 	<export function="getGUICenter" type="client"/>
 	<export function="getPlayerWeapons" type="shared"/>
 	<export function="rgbToHex" type="shared"/>
+	<export function="convertToMoney" type="shared"/>
+	<export function="findPlayer" type="shared"/>
+	<export function="getDateAndTime" type="shared"/>
 </meta>
