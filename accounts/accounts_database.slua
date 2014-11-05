@@ -42,7 +42,14 @@ function cacheAccountData(query,player,username)
 	return true
 end
 
-function isAccountDataLoaded(username)
+function isAccountDataLoaded(element)
+	--Check what "element" is first. If it's a player, we'll grab his username.
+	if type(element) ~= "string" and getElementType(element) == "player" then
+		username = getPlayerAccount(element)
+	else
+		username = element
+	end
+
 	if (accountData[username]) then
 		return true
 	else
@@ -50,19 +57,38 @@ function isAccountDataLoaded(username)
 	end
 end
 
-function getAllAccountData(username)
+function getAllAccountData(element)
+	--Check what "element" is first. If it's a player, we'll grab his username.
+	if type(element) ~= "string" and getElementType(element) == "player" then
+		username = getPlayerAccount(element)
+	else
+		username = element
+	end
+
 	return accountData[username] or false
 end
 
-function getAccountData(username,key)
-	if not accountData[username] then
-		return false
+function getAccountData(element,key)
+	--Check what "element" is first. If it's a player, we'll grab his username.
+	if type(element) ~= "string" and getElementType(element) == "player" then
+		username = getPlayerAccount(element)
+	else
+		username = element
 	end
+
+	if not accountData[username] then return false end
 	
 	return accountData[username][key] or false
 end
 
-function setAccountData(username,key,value)
+function setAccountData(element,key,value)
+	--Check what "element" is first. If it's a player, we'll grab his username.
+	if type(element) ~= "string" and getElementType(element) == "player" then
+		username = getPlayerAccount(element)
+	else
+		username = element
+	end
+
 	if not (accountData[username]) then
 		return false
 	end
@@ -79,7 +105,14 @@ function setAccountData(username,key,value)
 	return true
 end
 
-function flushAccountData(username)
+function flushAccountData(element)
+	--Check what "element" is first. If it's a player, we'll grab his username.
+	if type(element) ~= "string" and getElementType(element) == "player" then
+		username = getPlayerAccount(element)
+	else
+		username = element
+	end
+
 	if not (accountData[username]) then return false end
 	
 	local connection = exports.database:getConnection()

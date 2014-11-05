@@ -6,6 +6,7 @@
 	<script src="blips.lua" type="client"/>
 	<script src="death.slua" type="server"/>
 	<script src="ucp.slua" type="server"/>
+	<script src="nogoto.slua" type="server"/>
 	
 	<file src="images/sourcemode.png"/>
 </meta>
