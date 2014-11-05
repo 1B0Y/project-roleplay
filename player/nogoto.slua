@@ -1,3 +1,10 @@
+--[[
+        Project: SourceMode
+        Version: 1.0
+        Last Edited: 29/10/2014 (Jack)
+        Authors: Jack
+]]--
+
 local antispam = {}
 
 function nogoto(player,cmd,...)
@@ -26,6 +33,11 @@ function nogoto(player,cmd,...)
 			--Let's try to find the player (and use our new "part name" export)
 			target = exports.utils:findPlayer(name)
 			if target and isElement(target) then
+				if not exports.accounts:isPlayerLoggedIn(target) or not exports.accounts:isPlayerSpawned(target) then
+					outputChatBox("You cannot teleport to "..getPlayerName(target).." as he is unavailable.",player,255,0,0)
+					return
+				end
+				
 				if getElementData(player,"nogoto") == false then
 					outputChatBox(getPlayerName(target).." has his nogoto disabled. Ask him to enable it in order to teleport.",player,255,0,0)
 					return
