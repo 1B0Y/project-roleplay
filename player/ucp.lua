@@ -208,6 +208,7 @@ function updatePlayersList()
 	end
 end
 addEventHandler("onClientPlayerJoin",root,updatePlayersList)
+addEventHandler("onClientPlayerLeave",root,updatePlayersList)
 
 function getNews()
 	row = guiGridListAddRow(grids["news"])

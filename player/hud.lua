@@ -34,7 +34,7 @@ function logo()
 	if not (exports.accounts:isPlayerLoggedIn()) or not (exports.accounts:isPlayerSpawned()) then return false end
 	local scale = .75
 	local width,height = 350*scale,145*scale
-	local speed = 5000 --Increase to go slower, decrease to go faster.
+	local speed = 7500 --Increase to go slower, decrease to go faster.
 	local angle = math.cos(getTickCount() / speed) * 5
 	
 	dxDrawImage(rX/1.15-width/2,rY/1.1-height/2,width,height,"images/sourcemode.png",angle,0,0,tocolor(255,255,255,175),false)

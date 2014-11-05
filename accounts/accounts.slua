@@ -232,7 +232,7 @@ function register(username,password,email)
 		password = sha256(password)
 		
 		--Create the account
-		if (dbExec(connection,"INSERT INTO accounts (username,password,email,lastlogin) VALUES (?,?,?,now())",username,password,email or "NULL")) then
+		if (dbExec(connection,"INSERT INTO accounts (username,password,email) VALUES (?,?,?)",username,password,email or "NULL")) then
 			triggerClientEvent(client,"onAccountRegistered",client,true,username,password)
 		else
 			triggerClientEvent(client,"returnUpdateStatus",client,"register","A network issue has occured. Please contact an admin. (Err: #04)")

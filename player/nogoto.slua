@@ -1,11 +1,13 @@
 --[[
         Project: SourceMode
         Version: 1.0
-        Last Edited: 29/10/2014 (Jack)
+        Last Edited: 05/11/2014 (Jack)
         Authors: Jack
 ]]--
 
 local antispam = {}
+
+addEvent("onPlayerLoggedIn",true)
 
 function nogoto(player,cmd,...)
 	local args = {...}
@@ -38,7 +40,7 @@ function nogoto(player,cmd,...)
 					return
 				end
 				
-				if getElementData(player,"nogoto") == false then
+				if getElementData(target,"nogoto") == false then
 					outputChatBox(getPlayerName(target).." has his nogoto disabled. Ask him to enable it in order to teleport.",player,255,0,0)
 					return
 				end
@@ -55,13 +57,23 @@ function nogoto(player,cmd,...)
 					return
 				end
 				
+				if (getPedOccupiedVehicle(player)) then
+					removePedFromVehicle(player)
+				end
+				
 				local x,y,z = getElementPosition(target)
 				local int = getElementInterior(target)
 				local dim = getElementDimension(target)
 				
-				setElementPosition(player,x,y,z)
-				setElementInterior(player,int)
-				setElementDimension(player,dim)
+				if (isPedInVehicle(target)) then
+					local vehicle = getPedOccupiedVehicle(target)
+					warpPedIntoVehicle(player,vehicle)
+				else
+					setElementPosition(player,x,y,z)
+					setElementInterior(player,int)
+					setElementDimension(player,dim)
+				end
+				
 				antispam[player] = setTimer(function(player) antispam[player] = nil end, 60000, 1, player)
 				outputChatBox("You have teleported to "..getPlayerName(target),player,255,255,0)
 				outputChatBox(getPlayerName(player).." has teleported to you.",target,255,255,0)
@@ -77,3 +89,9 @@ function nogoto(player,cmd,...)
 end
 addCommandHandler("nogoto",nogoto)
 addCommandHandler("goto",nogoto)
+
+addEventHandler("onPlayerLoggedIn",root,
+function()
+	local nogoto = getAccountData(source,"nogoto")
+	setElementData(source,"nogoto",nogoto)
+end)
