@@ -33,10 +33,12 @@
 		<export function="getPlayerAccount" type="server"/>
 		<export function="isPlayerLoggedIn" type="shared"/>
 		<export function="onPlayerLogout" type="client"/>
+		<export function="logoutPlayer" type="server"/>
 		
 		<!-- Character exports-->
 		<export function="onCharacterChanged" type="client"/>
-		<export function="isPlayerSpawned" type="server"/>
+		<export function="isPlayerSpawned" type="shared"/>
+		<export function="changeCharacter" type="server"/>
 		
 	
 	<!-- File stuff -->

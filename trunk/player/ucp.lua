@@ -157,11 +157,11 @@ function onUCPClick(button,state)
 		if (source == buttons["accounts-logout"]) then
 			guiSetVisible(windows["UCP"],false)
 			showCursor(false)
-			triggerClientEvent("logoutPlayer",localPlayer)
+			triggerServerEvent("logoutPlayer",localPlayer,localPlayer)
 		elseif (source == buttons["accounts-changeChar"]) then
 			guiSetVisible(windows["UCP"],false)
 			showCursor(false)
-			triggerClientEvent("changeCharacter",localPlayer)
+			triggerServerEvent("changeCharacter",localPlayer,localPlayer)
 		end
 	end
 end

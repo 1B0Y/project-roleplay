@@ -29,12 +29,13 @@ function onPlayerLogin()
 end
 addEventHandler("onPlayerLoggedIn",root,onPlayerLogin)
 
-function logoutPlayer()
-	triggerEvent("onPlayerAttemptLogout",client)
+function logoutPlayer(player)
+	exports.accounts:logoutPlayer(player)
 end
 addEventHandler("logoutPlayer",root,logoutPlayer)
 
-function changeCharacter()
-	triggerEvent("onPlayerChangeCharacter",client)
+function changeCharacter(player)
+	if not player or not isElement(player) then error("Player not found.") end
+	exports.accounts:changeCharacter(player)
 end
 addEventHandler("changeCharacter",root,changeCharacter)

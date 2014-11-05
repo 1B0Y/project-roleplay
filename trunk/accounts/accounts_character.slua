@@ -32,8 +32,15 @@ function onPlayerSelectCharacter(data)
 end
 addEventHandler("onPlayerSelectCharacter",root,onPlayerSelectCharacter)
 
-function onPlayerChangeCharacter()
-	if not client or not isElement(client) then return false end
+function onCharacterChange(player)
+	outputDebugString("onPlayerChangeCharacter()")
+
+	if not client then
+		client = player
+	end
+	
+	if not client or not isElement(client) or not getElementType(client) == "player" then error("Player not found") end
+	outputDebugString("Despawning character...")
 	despawnCharacter(client)
 	triggerClientEvent(client,"characters:toggleGUI",client,"characters",true,true)
 	triggerClientEvent(client,"characters:toggleGUI",client,"play",true,true)
@@ -41,7 +48,7 @@ function onPlayerChangeCharacter()
 	switchCamera(client,"character")
 	flushAccountData(getPlayerAccount(source)) --Force-save the account data
 end
-addEventHandler("onPlayerChangeCharacter",root,onPlayerChangeCharacter)
+addEventHandler("onPlayerChangeCharacter",root,onCharacterChange)
 
 function onPlayerLoggedOut()
 	if not source or not isElement(source) then return false end
@@ -173,7 +180,7 @@ function spawnCharacter(player,data)
 	)
 	triggerEvent("onPlayerSpawned",player)
 	triggerClientEvent("callSpawnTrigger",player)
-	
+	triggerClientEvent(source,"updatePlayerSpawnState",source,true)
 	return true
 end
 	
@@ -189,6 +196,7 @@ function despawnCharacter(player)
 	triggerEvent("onPlayerDespawned",player)
 	setTimer(triggerClientEvent,250,1,player,"callDespawnTrigger",player)
 	removeElementData(player,"character")
+	setTimer(triggerClientEvent,250,1,player,"updatePlayerSpawnState",player,false)
 end
 
 --saveCharacterData

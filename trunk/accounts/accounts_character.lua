@@ -27,6 +27,7 @@ local selectedChar --Currently selected character
 local character --ped
 local ped -- temp ped
 local checkTimer
+local spawned = false
 
 --Character Creator
 local creating = false
@@ -48,6 +49,7 @@ addEvent("onCharacterCreated",true)
 addEvent("onCharacterDeleted",true)
 addEvent("callSpawnTrigger",true)
 addEvent("callDespawnTrigger",true)
+addEvent("updatePlayerSpawnState",true)
 
 function onStart()
 	local rX,rY = guiGetScreenSize()
@@ -476,3 +478,12 @@ function onPlayerDespawned()
 	triggerEvent("onClientPlayerDespawned",localPlayer)
 end
 addEventHandler("callDespawnTrigger",root,onPlayerSpawned)
+
+function updateSpawnState(state)
+	spawned = state
+end
+addEventHandler("updatePlayerSpawnState",root,updateSpawnState)
+
+function isPlayerSpawned()
+	return spawned
+end
