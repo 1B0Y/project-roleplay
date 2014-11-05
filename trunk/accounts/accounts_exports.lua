@@ -36,4 +36,5 @@ function changeCharacter(player)
 	if not player or not isElement(player) or not (getElementType(player) == "player") then return false end
 	
 	onCharacterChange(player)
+	return true
 end
