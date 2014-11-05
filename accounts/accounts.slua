@@ -152,7 +152,7 @@ function logOut(player)
 		player = client
 	end
 	
-	if not player or not isElement(player) or not getElementType(player) == "player" then return false end
+	if not player or not isElement(player) or not getElementType(player) == "player" then error("Player not found.") end
 	if (isPlayerLoggedIn(player)) then
 		triggerClientEvent(player,"characters:toggleGUI",player,"all",true,false)
 		triggerClientEvent(player,"accounts:toggleGUI",player,"login",true,true)

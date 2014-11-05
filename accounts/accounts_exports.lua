@@ -24,3 +24,16 @@ function isPlayerSpawned(player)
 	
 	if getElementData(player,"character") then return true else return false end
 end
+
+function logoutPlayer(player)
+	if not player or not isElement(player) or not (getElementType(player) == "player") then return false end
+	
+	logOut(player)
+	return true
+end
+
+function changeCharacter(player)
+	if not player or not isElement(player) or not (getElementType(player) == "player") then return false end
+	
+	onCharacterChange(player)
+end
