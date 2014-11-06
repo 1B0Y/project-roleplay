@@ -9,6 +9,15 @@ local antispam = {}
 
 addEvent("onPlayerLoggedIn",true)
 
+function onStart()
+    for k,v in ipairs(getElementsByType("player")) do
+        if exports.accouts:isPlayerLoggedIn(v) then
+            setElementData(v,"nogoto",getAccountData(v,"nogoto") or false)
+        end
+    end
+end
+addEventHandler("onResourceStart",resourceRoot,onStart)
+
 function nogoto(player,cmd,...)
 	local args = {...}
 	
@@ -91,7 +100,7 @@ addCommandHandler("nogoto",nogoto)
 addCommandHandler("goto",nogoto)
 
 addEventHandler("onPlayerLoggedIn",root,
-function()
-	local nogoto = getAccountData(source,"nogoto")
-	setElementData(source,"nogoto",nogoto)
+function(player)
+	local nogoto = getAccountData(player,"nogoto")
+	setElementData(player,"nogoto",nogoto)
 end)
