@@ -137,7 +137,7 @@ function logIn(username,password,remember,encrypted)
 			else
 				loadAccountData(client,username)
 			end
-			triggerEvent("onPlayerLoggedIn",client)
+			triggerEvent("onPlayerLoggedIn",client,client)
 			triggerClientEvent("triggerClientPlayerLoggedIn",client)
 		else
 			triggerClientEvent(client,"returnUpdateStatus",client,"login","Incorrect password! Please try again.")
